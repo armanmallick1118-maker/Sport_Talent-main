@@ -21,6 +21,7 @@ RUN npx prisma generate
 
 # Railway exposes the port dynamically, but we hint 8000
 EXPOSE 8000
+ENV PORT=8000
 
 # Start the Node.js server
 CMD ["npm", "run", "start"]
