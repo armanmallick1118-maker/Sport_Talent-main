@@ -53,9 +53,38 @@ The relational database is managed by **Prisma** and contains the following core
 
 ---
 
-## 🚀 Getting Started
+## 🌟 PRANA Web Application (`localhost:3000`)
 
-To run the backend locally:
+The flagship web interface is built with **Next.js 16 (Turbopack)**, **React 19**, and **Tailwind CSS**, located in `Sport_Talent-main-yoyo/apps/web`.
+
+### ✨ Core Features
+- **🪐 Circular PRANA Intelligence Ring:** An interactive 13-node orbiting navigation system connecting all features of the athlete lifecycle.
+- **🤖 Coach Jack AI Assistant:** High-performance conversational AI powered by Groq LLaMA 3.3 70B & 120B with dynamic user profile personalization, custom diet plans, workout generation, and seamless in-chat goal creation.
+- **🎯 Interactive Goal Engine:** Milestones, habit tracking, templates, and transfer to Coach Jack.
+- **📍 Sports & Fitness Radar:** Geospatial facility discovery with Indian Rupee (₹) pricing for gyms, Olympic tracks, swimming pools, turf arenas, and biomechanics labs.
+- **⚡ Dynamic Recovery & Sleep Engine:** Chronotype analysis, REM/Deep cycle breakdown, and autonomic readiness scoring.
+- **🧠 24/7 Mental Wellness & Crisis Support:** Dedicated athlete mental resilience tools with direct toll-free crisis helpline access.
+- **📹 Live CV Motion Coach:** Real-time athlete posture kinematics via native webcam with Rep & Form detection.
+
+### 🚀 Running the Web App Locally
+
+1. Navigate to the web application directory:
+   ```bash
+   cd Sport_Talent-main-yoyo/apps/web
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🚀 Backend Setup
 
 1. Navigate to the backend directory:
    ```bash
@@ -70,14 +99,8 @@ To run the backend locally:
    npx prisma generate
    npx prisma db push
    ```
-4. Start the server (and automatically load all plugins):
+4. Start the server:
    ```bash
-   npm run dev
+   node server.js
    ```
-   *(Or use `node server.js`)*
-
-The server will start on `http://localhost:8000` (or your defined `PORT`). 
-
-**Note:** The backend no longer serves a static HTML login portal. Hitting the root URL will now return a clean JSON summary of the active API endpoints. You will also see a success message indicating that the database is connected and the Plugin System has successfully mounted all feature modules.
-
-To access the user interface, please start the React frontend located in the `frontend` directory.
+   The backend API will run on `http://localhost:8000`.
