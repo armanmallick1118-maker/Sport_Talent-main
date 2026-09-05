@@ -94,7 +94,7 @@ export const GeospatialRadarView: React.FC = () => {
   const [newFacilityRegion, setNewFacilityRegion] = useState<SportsFacility["region"]>("North");
   const [newFacilityDistance, setNewFacilityDistance] = useState(24);
   const [newFacilityAddress, setNewFacilityAddress] = useState("");
-  const [newFacilityPricing, setNewFacilityPricing] = useState("Pay & Play: $5/session");
+  const [newFacilityPricing, setNewFacilityPricing] = useState("Pay & Play: ₹399/session");
 
   // Comprehensive Database of Sports, Fitness & Athletic Facilities (14+ detailed entries)
   const [facilities, setFacilities] = useState<SportsFacility[]>([
@@ -111,7 +111,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "Open 24/7 (Access Keycard)",
       isOpenNow: true,
       accessType: "Membership",
-      pricing: "$45/mo • Day Pass $12",
+      pricing: "₹2,499/mo • Day Pass ₹499",
       capacity: "180 Athletes • 12 Olympic Platforms",
       amenities: [
         "Eleiko Calibrated Plates",
@@ -142,7 +142,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "05:30 AM - 10:00 PM",
       isOpenNow: true,
       accessType: "SAI / Gov Subsidized",
-      pricing: "Free for Registered Athletes • $4 Public",
+      pricing: "Free for Registered Athletes • ₹199 Public",
       capacity: "65,000 Seats • 8-Lane 400m Track",
       amenities: [
         "Mondo Synthetic Super X 720 Track",
@@ -173,7 +173,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 09:30 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$7 / 90-min Lap Session",
+      pricing: "₹349 / 90-min Lap Session",
       capacity: "10 Lanes (50m Olympic) + 25m Warmup",
       amenities: [
         "50m Heated Olympic Pool",
@@ -204,7 +204,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 11:30 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$25/hr Team Turf Booking",
+      pricing: "₹1,499/hr Team Turf Booking",
       capacity: "Full 11v11 Pitch • 400m Grass Perimeter",
       amenities: [
         "FIFA Quality Pro Synthetic Turf",
@@ -235,7 +235,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "05:00 AM - 11:00 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$9/hr Court Slot",
+      pricing: "₹499/hr Court Slot",
       capacity: "14 BWF-Approved Indoor Courts",
       amenities: [
         "BWF Grade 1 Teakwood + Mat Flooring",
@@ -266,7 +266,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 10:30 PM",
       isOpenNow: true,
       accessType: "Membership",
-      pricing: "$35/mo • Open Sparring $10",
+      pricing: "₹1,999/mo • Open Sparring ₹399",
       capacity: "Official 24ft Ring + 30ft Octagon Cage",
       amenities: [
         "Olympic Regulation Boxing Ring",
@@ -297,7 +297,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "08:00 AM - 08:00 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "Cryo Session $25 • Full Metabolic Test $60",
+      pricing: "Cryo Session ₹1,499 • Full Metabolic Test ₹3,999",
       capacity: "6 Assessment Bays • 2 Cryo Chambers",
       amenities: [
         "Whole-Body -110°C Cryotherapy Chamber",
@@ -328,7 +328,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "05:30 AM - 09:30 PM",
       isOpenNow: true,
       accessType: "Membership",
-      pricing: "$40/mo • Drop-in $10",
+      pricing: "₹2,199/mo • Drop-in ₹499",
       capacity: "90 Athletes • 40m Turf Sled Track",
       amenities: [
         "Rogue Fitness Monster Rigs",
@@ -359,7 +359,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 11:00 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$30/hr Full Court Slot",
+      pricing: "₹1,799/hr Full Court Slot",
       capacity: "8,500 Spectator Seating",
       amenities: [
         "Maple Hardwood Floating Floor",
@@ -390,7 +390,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "07:00 AM - 08:30 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$12/hr Hydro Session",
+      pricing: "₹699/hr Hydro Session",
       capacity: "25m Deep Well + Heated Rehab Tank",
       amenities: [
         "Underwater Hydro-Treadmill",
@@ -421,7 +421,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "05:00 AM - 08:30 PM",
       isOpenNow: true,
       accessType: "Public",
-      pricing: "Free Public Access • $15 Net Practice",
+      pricing: "Free Public Access • ₹799 Net Practice",
       capacity: "400m Running Track • 4 Cricket Nets",
       amenities: [
         "Cinder & Synthetic Sprint Tracks",
@@ -452,7 +452,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 11:00 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$8/hr Slot",
+      pricing: "₹449/hr Slot",
       capacity: "8 Courts • 2 Glass Squash Courts",
       amenities: [
         "High-Tension Synthetic Mats",
@@ -483,7 +483,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 10:00 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: "$10 Day Pass • $35/mo",
+      pricing: "₹499 Day Pass • ₹1,999/mo",
       capacity: "Outdoor Strongman Yard + Indoor Gym",
       amenities: [
         "Atlas Stones (40kg to 160kg)",
@@ -514,7 +514,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "09:00 AM - 06:00 PM",
       isOpenNow: false,
       accessType: "Pay & Play",
-      pricing: "$85 Biomechanical Movement Audit",
+      pricing: "₹4,999 Biomechanical Movement Audit",
       capacity: "Full Motion Capture Optical Studio",
       amenities: [
         "16-Camera Qualisys Optical MoCap",
@@ -620,7 +620,7 @@ export const GeospatialRadarView: React.FC = () => {
       operatingHours: "06:00 AM - 10:00 PM",
       isOpenNow: true,
       accessType: "Pay & Play",
-      pricing: newFacilityPricing || "Pay & Play: $5/session",
+      pricing: newFacilityPricing || "Pay & Play: ₹399/session",
       capacity: "Public Sports Amenity",
       amenities: ["Verified Community Submission", "Training Area", "Equipment on Site"],
       keyHighlight: "Newly registered sports infrastructure node on PRANA Radar",
@@ -1485,7 +1485,7 @@ export const GeospatialRadarView: React.FC = () => {
                 <label className="text-slate-300 font-mono block mb-1">Pricing / Access Model:</label>
                 <input
                   type="text"
-                  placeholder="e.g. Pay & Play: $6/hr or Free Public"
+                  placeholder="e.g. Pay & Play: ₹499/hr or Free Public"
                   value={newFacilityPricing}
                   onChange={(e) => setNewFacilityPricing(e.target.value)}
                   className="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white font-mono text-xs focus:outline-none focus:border-cyan-500"
