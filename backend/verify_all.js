@@ -5,7 +5,7 @@ const runVerification = async () => {
         console.log("========================================");
         console.log("🚀 STARTING COMPREHENSIVE VERIFICATION");
         console.log("========================================\n");
-        const baseUrl = 'http://localhost:5000/api/v1';
+        const baseUrl = `http://localhost:${process.env.PORT || 8000}/api/v1`;
 
         const fetchAPI = async (endpoint, options = {}) => {
             const res = await fetch(`${baseUrl}${endpoint}`, {

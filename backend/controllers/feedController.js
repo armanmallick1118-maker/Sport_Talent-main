@@ -34,7 +34,7 @@ const getFeed = async (req, res) => {
 // @access  Protected
 const createFeedPost = async (req, res) => {
   try {
-    const { type, title, content, mediaUrl } = req.body;
+    const { type, title, content, mediaUrl, external_url } = req.body;
     // authorId comes from the verified JWT token — never trust the client
     const authorId = req.user?.id || req.user?.userId || 'anonymous';
 
@@ -52,6 +52,7 @@ const createFeedPost = async (req, res) => {
         content,
         authorId,
         mediaUrl: mediaUrl || null,
+        external_url: external_url || null,
       },
     });
 
@@ -68,7 +69,25 @@ const createFeedPost = async (req, res) => {
   }
 };
 
+// @desc    Get a single feed post by ID
+// @route   GET /api/v1/feed/:id
+// @access  Public
+const getPostById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await prisma.feedPost.findUnique({ where: { id } });
+    if (!post) {
+      return res.status(404).json({ success: false, error: 'Post not found' });
+    }
+    return res.status(200).json({ success: true, data: post });
+  } catch (error) {
+    console.error('Error fetching post by ID:', error);
+    return res.status(500).json({ success: false, error: 'Server Error' });
+  }
+};
+
 module.exports = {
   getFeed,
   createFeedPost,
+  getPostById,
 };

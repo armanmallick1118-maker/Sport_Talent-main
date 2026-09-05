@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password_hash String
+  role          String    @default("athlete")
+  created_at    DateTime  @default(now())
+
+  profile       Profile?
+  assessments   UserAssessment[]
+  radar_metric  RadarMetric?
+}
+
+model Profile {
+  id                    String  @id @default(uuid())
+  user_id               String  @unique
+  user                  User    @relation(fields: [user_id], references: [id])
+  full_name             String?
+  sport                 String?
+  position              String?
+  location              String?
+  avatar_url            String?
+  is_verified           Boolean @default(false)
+  completion_percentage Int     @default(0)
+}
+
+model AssessmentType {
+  id               String  @id @default(uuid())
+  name             String
+  measurement_unit String
+  is_lower_better  Boolean @default(false)
+
+  user_assessments UserAssessment[]
+}
+
+model UserAssessment {
+  id                 String         @id @default(uuid())
+  user_id            String
+  user               User           @relation(fields: [user_id], references: [id])
+  assessment_type_id String
+  assessment_type    AssessmentType @relation(fields: [assessment_type_id], references: [id])
+  score              Float
+  qualitative_grade  String?
+  assessed_at        DateTime       @default(now())
+  
+  // Existing AI integration fields
+  status             String?
+  mediaUrl           String?
+  aiMetrics          String?
+}
+
+model RadarMetric {
+  user_id       String @id
+  user          User   @relation(fields: [user_id], references: [id])
+  overall_score Int    @default(0)
+  speed         Int    @default(0)
+  technique     Int    @default(0)
+  agility       Int    @default(0)
+  endurance     Int    @default(0)
+  strength      Int    @default(0)
+}
+
+model FeedPost {
+  id         String   @id @default(uuid())
+  type       String   // e.g., 'achievement', 'news', 'announcement', 'update'
+  title      String
+  content    String
+  authorId   String
+  mediaUrl   String?
+  created_at DateTime @default(now())
+}
+

@@ -1,51 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '../services/api';
 
 export default function TrainingFocus() {
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('athleteProfile');
     if (savedProfile) {
       setProfile(JSON.parse(savedProfile));
     }
-  }, []);
 
-  const trainingFocusList = [
-    {
-      id: 1,
-      title: 'Agility',
-      description: 'Enhance rapid directional changes, footwork speed, and dynamic balance on the field.',
-      icon: '⚡',
-      color: 'from-amber-500/20 border-amber-500/30 text-amber-400',
-    },
-    {
-      id: 2,
-      title: 'Endurance',
-      description: 'Build high-intensity stamina to maintain peak performance throughout match halves.',
-      icon: '🔥',
-      color: 'from-blue-500/20 border-blue-500/30 text-blue-400',
-    },
-  ];
+    const fetchSuggestions = async () => {
+      try {
+        const response = await API.get('/api/v1/ai-suggestions/me');
+        setAiSuggestion(response.data.data);
+      } catch (err) {
+        if (err.response?.status === 401) {
+          navigate('/login');
+          return;
+        }
+        setError(err.response?.data?.error || 'Network error. Ensure backend is running.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const recommendations = [
-    {
-      category: 'Cone drills',
-      desc: 'Improves sharp cutting angles, acceleration, and deceleration mechanics.',
-      duration: '15 mins / session',
-    },
-    {
-      category: 'Shuttle runs',
-      desc: 'Boosts explosive anaerobic capacity and multi-directional recovery speed.',
-      duration: '4 sets of 5 reps',
-    },
-    {
-      category: 'Interval training',
-      desc: 'Maximizes VO2 max and trains your heart to recover rapidly under fatigue.',
-      duration: '20 mins high-intensity',
-    },
-  ];
+    fetchSuggestions();
+  }, [navigate]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -53,82 +39,71 @@ export default function TrainingFocus() {
       <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 mb-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-3 mb-3">
-            <span className="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full">
-              Phase 16 Recommendations
+            <span className="bg-purple-500/10 border border-purple-500/30 text-purple-600 text-xs font-semibold uppercase tracking-wide px-3 py-1 rounded-full">
+              ✨ AI Powered Analysis
             </span>
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900 mb-1">
             Your Training Focus
           </h1>
           <p className="text-slate-500 text-sm">
-            AI-optimized training roadmap customized for {profile?.name || 'Athlete'} ({profile?.primarySport || 'Football'}).
+            AI-optimized training roadmap customized for {profile?.name || 'Athlete'}.
           </p>
         </div>
 
         <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center min-w-[220px]">
           <span className="block text-slate-500 text-xs uppercase font-semibold mb-1">Status</span>
-          <span className="text-xl font-bold text-emerald-400">Ready to Train</span>
-        </div>
-      </div>
-
-      {/* Focus Area Section */}
-      <div className="mb-10">
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Core Performance Priorities</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {trainingFocusList.map((item, index) => (
-            <div
-              key={item.id}
-              className={`bg-white border rounded-2xl p-6 shadow-sm relative overflow-hidden flex items-start gap-4 border-slate-200`}
-            >
-              <div className="text-3xl bg-slate-50 p-3 rounded-xl border border-slate-200">
-                {item.icon}
-              </div>
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
-                  Priority 0{index + 1}
-                </span>
-                <h3 className="text-2xl font-semibold text-slate-900 mt-0.5 mb-2">{item.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{item.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Recommended Drills Section */}
-      <div className="mb-10">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-slate-900">Recommended Routine</h2>
-          <span className="text-xs text-slate-500 bg-slate-50 px-3 py-1 rounded-lg border border-slate-200">
-            Tailored for Agility & Endurance
+          <span className="text-xl font-bold text-emerald-600">
+             {loading ? 'Analyzing...' : 'Ready to Train'}
           </span>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {recommendations.map((rec, idx) => (
-            <div
-              key={idx}
-              className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between"
-            >
+      {loading && (
+        <div className="text-center py-20 text-slate-500 animate-pulse">
+          Generating personalized AI insights based on your metrics...
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 text-red-600 rounded-xl p-6 mb-8">
+          <strong>Notice:</strong> {error}
+        </div>
+      )}
+
+      {!loading && aiSuggestion && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          
+          {/* Best Sport Recommendation */}
+          <div className="bg-white border rounded-2xl p-8 shadow-sm border-slate-200 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-10 opacity-50"></div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Recommended Sport</h2>
+            <p className="text-slate-500 text-sm mb-6">Based on your physical metrics, you show high potential in this field.</p>
+            
+            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <div className="text-4xl">🏆</div>
               <div>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold uppercase px-2.5 py-0.5 rounded">
-                    Recommended
-                  </span>
-                  <span className="text-slate-500 text-xs font-semibold">0{idx + 1}</span>
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{rec.category}</h3>
-                <p className="text-slate-500 text-sm mb-4 leading-relaxed">{rec.desc}</p>
-              </div>
-
-              <div className="border-t border-slate-200 pt-3 mt-auto flex justify-between items-center text-xs text-slate-600 font-medium">
-                <span>Suggested Duration:</span>
-                <span className="text-blue-400">{rec.duration}</span>
+                <h3 className="text-2xl font-bold text-blue-600">{aiSuggestion.recommended_sport}</h3>
+                <span className="text-xs font-semibold uppercase tracking-widest text-slate-500">Perfect Match</span>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* Improvement Tips */}
+          <div className="bg-white border rounded-2xl p-8 shadow-sm border-slate-200 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-50 rounded-bl-full -z-10 opacity-50"></div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">How to Improve</h2>
+            <p className="text-slate-500 text-sm mb-6">Actionable advice from your AI Coach.</p>
+            
+            <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-100/50">
+              <p className="text-slate-700 leading-relaxed text-sm whitespace-pre-wrap">
+                {aiSuggestion.improvement_tips}
+              </p>
+            </div>
+          </div>
+
         </div>
-      </div>
+      )}
 
       <div className="flex justify-center gap-4">
         <button

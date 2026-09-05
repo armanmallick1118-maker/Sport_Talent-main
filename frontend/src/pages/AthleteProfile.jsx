@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import AthleteAnalytics from './AthleteAnalytics';
+import API from '../services/api';
 
 const saveProfile = async (profileData) => {
   try {
-    const token = localStorage.getItem('token');
-    await axios.post('http://localhost:8000/api/v1/athletes/profile', profileData, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-    });
+    const res = await API.post('/api/v1/athletes/profile', profileData);
+    return res.data?.profile;
   } catch (error) {
     console.warn('Backend offline. Saving to local storage fallback:', error.message);
     localStorage.setItem('athleteProfile', JSON.stringify(profileData));
+    return null;
   }
 };
 
@@ -19,27 +18,66 @@ const TABS = [
   { id: 'analytics', label: '📊 Analytics' },
 ];
 
+const emptyProfile = {
+  name: '',
+  age: '',
+  height: '',
+  weight: '',
+  location: '',
+  primarySport: 'Football',
+  position: '',
+  experience: '',
+  trainingFrequency: '3-4 days/week',
+};
+
+const parseStoredProfile = () => {
+  try {
+    return JSON.parse(localStorage.getItem('athleteProfile') || 'null');
+  } catch {
+    localStorage.removeItem('athleteProfile');
+    return null;
+  }
+};
+
+const normalizeProfile = (data = {}) => {
+  const normalized = {
+    ...emptyProfile,
+    ...data,
+    name: data.name || data.full_name || '',
+    age: data.age ?? '',
+    height: data.height ?? '',
+    weight: data.weight ?? '',
+    location: data.location || '',
+    primarySport: data.primarySport || data.sport || 'Football',
+    position: data.position || '',
+    experience: data.experience ?? '',
+    trainingFrequency: data.trainingFrequency || data.training_frequency || '3-4 days/week',
+  };
+
+  return Object.fromEntries(
+    Object.entries(normalized).map(([key, value]) => [key, value === null ? '' : value])
+  );
+};
+
+const displayValue = (value, fallback = '--') => {
+  if (value === null || value === undefined || value === '') return fallback;
+  return value;
+};
+
 export default function AthleteProfile() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [profile, setProfile] = useState({
-    name: '', age: '', height: '', weight: '',
-    location: '', primarySport: 'Football',
-    position: '', experience: '', trainingFrequency: '3-4 days/week',
-  });
+  const [profile, setProfile] = useState(emptyProfile);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     async function fetchProfile() {
       try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get('http://localhost:8000/api/v1/athletes/profile', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (res.data) setProfile(res.data);
+        const res = await API.get('/api/v1/athletes/profile');
+        if (res.data) setProfile(normalizeProfile(res.data));
       } catch {
-        const stored = localStorage.getItem('athleteProfile');
+        const stored = parseStoredProfile();
         const user   = JSON.parse(localStorage.getItem('user') || '{}');
-        if (stored)         setProfile(JSON.parse(stored));
+        if (stored)         setProfile(normalizeProfile(stored));
         else if (user.fullName) setProfile(prev => ({ ...prev, name: user.fullName }));
       }
     }
@@ -51,7 +89,12 @@ export default function AthleteProfile() {
   const handleSubmit = async e => {
     e.preventDefault();
     localStorage.setItem('athleteProfile', JSON.stringify(profile));
-    await saveProfile(profile);
+    const savedProfile = await saveProfile(profile);
+    if (savedProfile) {
+      const normalized = normalizeProfile({ ...profile, ...savedProfile });
+      setProfile(normalized);
+      localStorage.setItem('athleteProfile', JSON.stringify(normalized));
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -188,17 +231,19 @@ export default function AthleteProfile() {
                 <div className="w-16 h-16 rounded-full bg-blue-600/20 border-2 border-blue-500 flex items-center justify-center text-blue-400 font-bold text-2xl">
                   {profile.name ? profile.name.charAt(0).toUpperCase() : 'A'}
                 </div>
-                <div>
-                  <h4 className="text-xl font-semibold text-white leading-tight">{profile.name || 'Athlete Name'}</h4>
-                  <p className="text-blue-400 text-sm font-medium">{profile.primarySport} • {profile.position || 'Position'}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">{profile.location || 'Location'}</p>
+                <div className="min-w-0">
+                  <h4 className="text-xl font-semibold text-white leading-tight break-words">{profile.name || 'Athlete Name'}</h4>
+                  <p className="text-blue-400 text-sm font-medium break-words">
+                    {displayValue(profile.primarySport, 'Sport')} • {displayValue(profile.position, 'Position')}
+                  </p>
+                  <p className="text-slate-500 text-xs mt-0.5 break-words">{displayValue(profile.location, 'Location')}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3 text-sm bg-white/5 p-4 rounded-xl border border-white/10 mb-4">
-                <div><span className="block text-slate-400 text-xs">Age</span><span className="font-semibold text-white">{profile.age || '--'} yrs</span></div>
-                <div><span className="block text-slate-400 text-xs">Height / Weight</span><span className="font-semibold text-white">{profile.height || '--'} cm / {profile.weight || '--'} kg</span></div>
-                <div><span className="block text-slate-400 text-xs">Experience</span><span className="font-semibold text-white">{profile.experience || '--'} yrs</span></div>
-                <div><span className="block text-slate-400 text-xs">Training</span><span className="font-semibold text-white">{profile.trainingFrequency}</span></div>
+                <div><span className="block text-slate-400 text-xs">Age</span><span className="font-semibold text-white">{displayValue(profile.age)} yrs</span></div>
+                <div><span className="block text-slate-400 text-xs">Height / Weight</span><span className="font-semibold text-white break-words">{displayValue(profile.height)} cm / {displayValue(profile.weight)} kg</span></div>
+                <div><span className="block text-slate-400 text-xs">Experience</span><span className="font-semibold text-white">{displayValue(profile.experience)} yrs</span></div>
+                <div><span className="block text-slate-400 text-xs">Training</span><span className="font-semibold text-white break-words">{displayValue(profile.trainingFrequency)}</span></div>
               </div>
               <div className="text-center pt-2">
                 <span className="inline-block text-xs text-slate-300 border border-white/10 rounded-full px-3 py-1 bg-white/5">

@@ -8,6 +8,7 @@ import {
   ChevronRight,
   IdCard,
   Users,
+  Bot,
 } from 'lucide-react';
 import { getAssessmentHistory } from '../utils/assessmentStorage';
 
@@ -64,7 +65,7 @@ export default function AthleteDashboard() {
     { label: 'Assessment', icon: Activity, to: '/sports' },
     { label: 'My Results', icon: BarChart3, to: '/analytics' },
     { label: 'Talent Card', icon: IdCard, to: '/talent-card' },
-    { label: 'Find Scouts', icon: Users, to: '/leaderboard' },
+    { label: 'Find Scouts', icon: Users, to: '/scout-directory' },
   ];
 
   return (
@@ -216,10 +217,13 @@ export default function AthleteDashboard() {
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <button
           type="button"
-          onClick={() => navigate('/training-focus')}
-          className="flex flex-1 items-center justify-between rounded-xl px-1 py-3 text-sm font-medium text-slate-600"
+          onClick={() => navigate('/coach-jack')}
+          className="flex flex-1 items-center justify-between rounded-xl px-1 py-3 text-sm font-medium text-slate-600 hover:text-blue-600"
         >
-          Training focus
+          <span className="flex items-center gap-2">
+            <Bot size={16} className="text-blue-500" />
+            Ask Coach Jack
+          </span>
           <ChevronRight size={16} />
         </button>
         <button

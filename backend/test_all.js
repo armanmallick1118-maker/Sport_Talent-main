@@ -3,7 +3,7 @@ const http = require('http');
 const runTest = async () => {
     try {
         console.log("🚀 Starting Automated Backend Tests...\n");
-        const baseUrl = 'http://localhost:5000/api/v1';
+        const baseUrl = `http://localhost:${process.env.PORT || 8000}/api/v1`;
 
         // Helper function for fetch
         const fetchAPI = async (endpoint, options = {}) => {
@@ -98,7 +98,7 @@ if (typeof fetch === 'undefined') {
 const runNativeTest = async () => {
     try {
         console.log("🚀 Starting Automated Backend Tests...\n");
-        const baseUrl = 'http://localhost:5000/api/v1';
+        const baseUrl = `http://localhost:${process.env.PORT || 8000}/api/v1`;
 
         const fetchAPI = async (endpoint, options = {}) => {
             const res = await fetch(`${baseUrl}${endpoint}`, {

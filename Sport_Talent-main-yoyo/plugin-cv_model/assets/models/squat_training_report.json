@@ -1,0 +1,18 @@
+{
+  "model_type": "SquatSpecialist_HistGradientBoosting",
+  "train_samples": 1600,
+  "test_samples": 400,
+  "accuracy": 0.8375,
+  "f1_score": 0.8379,
+  "latency_ms": 8.97,
+  "fps_capacity": 111.5,
+  "classes": [
+    "asymmetrical_stance",
+    "excessive_forward_lean",
+    "good_form",
+    "incomplete_depth",
+    "knee_valgus"
+  ],
+  "joblib_artifact": "assets/models/squat_model.joblib",
+  "onnx_artifact": "assets/models/onnx\\athena_form_model.onnx"
+}

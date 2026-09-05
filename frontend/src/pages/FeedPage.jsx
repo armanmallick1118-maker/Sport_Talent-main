@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
 const TYPE_CONFIG = {
@@ -18,34 +19,89 @@ function timeAgo(dateStr) {
 
 function PostCard({ post }) {
   const cfg = TYPE_CONFIG[post.type?.toLowerCase()] || TYPE_CONFIG.news;
+  const isNewsBot = post.authorId === 'system-news-bot';
+  const navigate = useNavigate();
+  const goToDetail = () => navigate(`/feed/${post.id}`);
+
+  // Big photo card layout for auto-news with images
+  if (isNewsBot && post.mediaUrl) {
+    return (
+      <div
+        onClick={goToDetail}
+        className="bg-white border border-blue-100 rounded-2xl shadow-sm hover:shadow-lg transition-all overflow-hidden ring-1 ring-blue-100 col-span-1 sm:col-span-2 cursor-pointer group"
+      >
+        <div className="relative w-full h-52 sm:h-64 overflow-hidden">
+          <img
+            src={post.mediaUrl}
+            alt={post.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            onError={e => { e.target.style.display = 'none'; }}
+          />
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          {/* Badge */}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-blue-600 text-white rounded-full px-2.5 py-0.5 shadow">
+              📰 News
+            </span>
+          </div>
+          {/* Time */}
+          <span className="absolute top-3 right-3 text-[11px] text-white/80 bg-black/30 rounded-full px-2 py-0.5 backdrop-blur-sm">
+            {timeAgo(post.created_at)}
+          </span>
+          {/* Title over image */}
+          <h3 className="absolute bottom-3 left-3 right-3 font-bold text-white text-base sm:text-lg leading-snug drop-shadow-md">
+            {post.title}
+          </h3>
+        </div>
+        <div className="px-4 py-3 flex items-center justify-between">
+          <p className="text-slate-600 text-sm leading-relaxed line-clamp-2 flex-1">{post.content}</p>
+          <span className="ml-3 shrink-0 text-blue-600 text-xs font-semibold group-hover:underline">Read more →</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Standard card for user posts
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+    <div
+      onClick={goToDetail}
+      className={`bg-white border rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden cursor-pointer group ${isNewsBot ? 'border-blue-200 ring-1 ring-blue-100' : 'border-slate-200'}`}
+    >
       {post.mediaUrl && (
         <div className="w-full h-44 bg-slate-100 overflow-hidden">
           {post.mediaUrl.match(/\.(mp4|webm|mov)$/i) ? (
             <video src={post.mediaUrl} className="w-full h-full object-cover" controls muted />
           ) : (
-            <img src={post.mediaUrl} alt={post.title} className="w-full h-full object-cover"
+            <img src={post.mediaUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               onError={e => { e.target.style.display = 'none'; }} />
           )}
         </div>
       )}
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className={`inline-flex items-center gap-1 text-[11px] font-semibold border rounded-full px-2.5 py-0.5 ${cfg.color}`}>
-            {cfg.emoji} {cfg.label}
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={`inline-flex items-center gap-1 text-[11px] font-semibold border rounded-full px-2.5 py-0.5 ${cfg.color}`}>
+              {cfg.emoji} {cfg.label}
+            </span>
+            {isNewsBot && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold border border-indigo-200 bg-indigo-50 text-indigo-600 rounded-full px-2 py-0.5">
+                🤖 Daily Auto-News
+              </span>
+            )}
+          </div>
           <span className="text-xs text-slate-400">{timeAgo(post.created_at)}</span>
         </div>
-        <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-1 line-clamp-2">{post.title}</h3>
+        <h3 className="font-semibold text-slate-900 text-sm leading-snug mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">{post.title}</h3>
         <p className="text-slate-500 text-xs leading-relaxed line-clamp-3">{post.content}</p>
+        <p className="mt-2 text-xs font-semibold text-blue-600 group-hover:underline">Read more →</p>
       </div>
     </div>
   );
 }
 
 function CreatePost({ onPosted }) {
-  const [form, setForm]       = useState({ type: 'news', title: '', content: '', mediaUrl: '' });
+  const [form, setForm]       = useState({ type: 'news', title: '', content: '', mediaUrl: '', external_url: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState(false);
@@ -60,8 +116,9 @@ function CreatePost({ onPosted }) {
       await API.post('/api/v1/feed', {
         type: form.type, title: form.title.trim(),
         content: form.content.trim(), mediaUrl: form.mediaUrl.trim() || null,
+        external_url: form.external_url.trim() || null,
       });
-      setForm({ type: 'news', title: '', content: '', mediaUrl: '' });
+      setForm({ type: 'news', title: '', content: '', mediaUrl: '', external_url: '' });
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2500);
       onPosted();
@@ -96,6 +153,9 @@ function CreatePost({ onPosted }) {
           className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors resize-none" />
         <input type="url" name="mediaUrl" value={form.mediaUrl} onChange={handleChange}
           placeholder="🖼️  Poster / video URL (optional)"
+          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors" />
+        <input type="url" name="external_url" value={form.external_url} onChange={handleChange}
+          placeholder="🔗 Official link / Registration form URL (optional)"
           className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors" />
         <button type="submit" disabled={loading}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2">

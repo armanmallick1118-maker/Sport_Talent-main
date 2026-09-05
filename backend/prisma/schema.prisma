@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -17,9 +17,12 @@ model User {
   role          String    @default("athlete")
   created_at    DateTime  @default(now())
 
-  profile       Profile?
-  assessments   UserAssessment[]
-  radar_metric  RadarMetric?
+  profile           Profile?
+  assessments       UserAssessment[]
+  radar_metric      RadarMetric?
+  ai_recommendation AIRecommendation?
+  chat_messages     ChatMessage[]
+  scout_profile     ScoutProfile?
 }
 
 model Profile {
@@ -27,9 +30,14 @@ model Profile {
   user_id               String  @unique
   user                  User    @relation(fields: [user_id], references: [id])
   full_name             String?
+  age                   Int?
+  height                Int?
+  weight                Int?
   sport                 String?
   position              String?
   location              String?
+  experience            Int?
+  training_frequency    String?
   avatar_url            String?
   is_verified           Boolean @default(false)
   completion_percentage Int     @default(0)
@@ -72,12 +80,40 @@ model RadarMetric {
 }
 
 model FeedPost {
+  id           String   @id @default(uuid())
+  type         String   // e.g., 'achievement', 'news', 'announcement', 'update'
+  title        String
+  content      String
+  authorId     String
+  mediaUrl     String?
+  external_url String?  // Optional link to official page, registration form, full article, etc.
+  created_at   DateTime @default(now())
+}
+
+model AIRecommendation {
+  id               String   @id @default(uuid())
+  user_id          String   @unique
+  user             User     @relation(fields: [user_id], references: [id])
+  recommended_sport String
+  improvement_tips  String
+  generated_at     DateTime @default(now())
+}
+
+model ChatMessage {
   id         String   @id @default(uuid())
-  type       String   // e.g., 'achievement', 'news', 'announcement', 'update'
-  title      String
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  role       String   // 'user' or 'assistant'
   content    String
-  authorId   String
-  mediaUrl   String?
   created_at DateTime @default(now())
 }
 
+model ScoutProfile {
+  id                String  @id @default(uuid())
+  user_id           String  @unique
+  user              User    @relation(fields: [user_id], references: [id])
+  organization      String?
+  organization_type String?
+  region            String?
+  specialization    String?
+}

@@ -7,6 +7,15 @@ import API from '../services/api';
 const field =
   'w-full rounded-xl border border-slate-700/80 bg-[#111827] py-3 pl-11 pr-4 text-sm text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500';
 
+const storeSession = (token, user) => {
+  localStorage.setItem('token', token);
+  localStorage.setItem('role', user.role);
+  localStorage.setItem('isLoggedIn', 'true');
+  localStorage.setItem('userId', user.id);
+  localStorage.setItem('userEmail', user.email);
+  localStorage.setItem('user', JSON.stringify(user));
+};
+
 export default function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -34,25 +43,23 @@ export default function Register() {
 
     setLoading(true);
     try {
+      const email = formData.email.trim().toLowerCase();
+
       await API.post('/api/v1/auth/register', {
-        full_name: formData.fullName,
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
+        full_name: formData.fullName.trim(),
+        email,
+        password: formData.password.trim(),
         role: formData.role,
       });
 
       // Registration successful — now auto-login
       const loginRes = await API.post('/api/v1/auth/login', {
-        email: formData.email.trim().toLowerCase(),
-        password: formData.password,
+        email,
+        password: formData.password.trim(),
       });
 
       const { token, user } = loginRes.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', user.role);
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userId', user.id);
-      localStorage.setItem('userEmail', user.email);
+      storeSession(token, user);
 
       if (user.role === 'scout') {
         navigate('/scout/dashboard');
@@ -60,7 +67,10 @@ export default function Register() {
         navigate('/athlete/dashboard');
       }
     } catch (err) {
-      const msg = err.response?.data?.error || 'Registration failed. Please try again.';
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.details?.[0]?.message ||
+        'Registration failed. Please try again.';
       setError(msg);
     } finally {
       setLoading(false);

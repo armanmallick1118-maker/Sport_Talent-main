@@ -1,17 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { saveAssessmentResult } from '../utils/assessmentStorage';
 
 export default function SprintResult() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     async function fetchResults() {
+      // If we have state from the Gemini pipeline, use it immediately!
+      if (location.state && location.state.scores) {
+        const scores = location.state.scores;
+        const sprintData = {
+          time: 'N/A', // Gemini might not give exact time, but let's mock or calculate based on speed
+          topSpeed: `${scores.speed} km/h`,
+          score: scores.overall_score || scores.speed,
+        };
+        
+        setResult(sprintData);
+        saveAssessmentResult('10m Sprint Assessment (AI)', {
+          time: sprintData.time,
+          topSpeed: sprintData.topSpeed,
+          score: sprintData.score,
+          badge: '🟢 AI Verified',
+        });
+        setLoading(false);
+        return;
+      }
+
       if (!sessionId) {
         setError('No session ID provided.');
         setLoading(false);
@@ -20,10 +41,7 @@ export default function SprintResult() {
 
       try {
         setLoading(true);
-      let aiBaseUrl = import.meta.env.VITE_AI_API_URL || 'https://sporttalent-production-5756.up.railway.app';
-      if (!aiBaseUrl.startsWith('http')) {
-        aiBaseUrl = `https://${aiBaseUrl}`;
-      }
+        const aiBaseUrl = import.meta.env.VITE_AI_API_URL || '/ml';
         const res = await axios.get(`${aiBaseUrl}/api/v1/results/${sessionId}`);
         const data = res.data;
         
@@ -61,7 +79,7 @@ export default function SprintResult() {
     }
 
     fetchResults();
-  }, [sessionId]);
+  }, [sessionId, location.state]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

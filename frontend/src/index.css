@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -8,6 +9,7 @@
   --st-primary: #2563eb;
   --st-navy: #0b1220;
   --sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  --display: "Outfit", "Inter", system-ui, sans-serif;
 }
 
 html,
@@ -15,6 +17,7 @@ body,
 #root {
   min-height: 100%;
   width: 100%;
+  scroll-behavior: smooth;
 }
 
 html {
@@ -32,8 +35,8 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-#root {
-  min-height: 100svh;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--display);
 }
 
 button,
@@ -42,8 +45,37 @@ input,
 select,
 textarea {
   font-family: inherit;
+  transition: all 0.2s ease-in-out;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--st-primary);
+  outline-offset: 2px;
 }
 
 ::selection {
-  background: rgba(37, 99, 235, 0.16);
+  background: rgba(37, 99, 235, 0.2);
+  color: inherit;
 }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+

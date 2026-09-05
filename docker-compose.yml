@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sporttalent_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sporttalent
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Backend (Node.js API)
+  backend:
+    build: 
+      context: ./backend
+    container_name: sporttalent_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/sporttalent?schema=public
+      - JWT_SECRET=super_secret_dev_key
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # AI Pipeline (Python FastAPI)
+  ai-pipeline:
+    build:
+      context: ./ai-pipeline
+    container_name: sporttalent_ai
+    ports:
+      - "8001:8001"
+    environment:
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

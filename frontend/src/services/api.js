@@ -1,9 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || "https://sporttalent-production.up.railway.app").startsWith('http') 
-    ? (import.meta.env.VITE_API_URL || "https://sporttalent-production.up.railway.app") 
-    : `https://${import.meta.env.VITE_API_URL}`,
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.DEV ? "" : "https://sporttalent-production.up.railway.app"),
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,6 +19,27 @@ API.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+// Global Error Interceptor
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const requestUrl = error.config?.url || "";
+    const isAuthRequest =
+      requestUrl.includes("/api/v1/auth/login") ||
+      requestUrl.includes("/api/v1/auth/register");
+
+    if (error.response && error.response.status === 401 && !isAuthRequest) {
+      // Clear token and redirect to login
+      localStorage.removeItem("token");
+      localStorage.removeItem("athleteProfile");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default API;

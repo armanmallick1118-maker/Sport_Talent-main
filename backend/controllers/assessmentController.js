@@ -46,11 +46,13 @@ const uploadAssessment = async (req, res) => {
       return res.status(400).json({ error: 'Missing assessmentId in the body, Sensei!' });
     }
 
-    if (!req.file) {
-       return res.status(400).json({ error: 'No video file received, Sensei!' });
+    if (!req.file && !req.body.mediaUrl) {
+       return res.status(400).json({ error: 'No video file or mediaUrl received, Sensei!' });
     }
 
-    const mediaUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+    const mediaUrl = req.file
+      ? `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`
+      : req.body.mediaUrl;
 
     await prisma.userAssessment.update({
       where: { id: assessmentId },
@@ -145,5 +147,30 @@ const analyzeAssessment = async (req, res) => {
   }
 }; // This closes the analyzeAssessment function, Sensei!
 
+const getAssessment = async (req, res) => {
+  try {
+    const assessment = await prisma.userAssessment.findFirst({
+      where: {
+        id: req.params.id,
+        user_id: req.user.uid,
+      },
+      include: {
+        assessment_type: true,
+      },
+    });
+
+    if (!assessment) {
+      return res.status(404).json({ error: 'Assessment not found, Sensei!' });
+    }
+
+    res.status(200).json({
+      success: true,
+      assessment,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch assessment: ' + error.message });
+  }
+};
+
 // This exports everything properly to the router, Sensei!
-module.exports = { startAssessment, uploadAssessment, analyzeAssessment };
+module.exports = { startAssessment, uploadAssessment, analyzeAssessment, getAssessment };

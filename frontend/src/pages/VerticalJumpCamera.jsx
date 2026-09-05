@@ -9,12 +9,16 @@ export default function VerticalJumpCamera() {
   const [countdown, setCountdown] = useState(null);
 
   useEffect(() => {
+    let activeStream = null;
+
     async function setupCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 1280, height: 720, facingMode: 'user' },
           audio: false,
         });
+        activeStream = stream;
+
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setCameraReady(true);
@@ -27,9 +31,7 @@ export default function VerticalJumpCamera() {
     setupCamera();
 
     return () => {
-      if (videoRef.current?.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-      }
+      activeStream?.getTracks().forEach((track) => track.stop());
     };
   }, []);
 

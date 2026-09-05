@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Activity, Rss, Compass, User } from 'lucide-react';
+import { Home, Activity, Rss, Compass, User, Bot } from 'lucide-react';
 
 export default function BottomNav() {
   const location = useLocation();
@@ -14,6 +14,7 @@ export default function BottomNav() {
     { to: '/sports', label: 'Assess', icon: Activity },
     { to: '/feed',             label: 'Feed',    icon: Rss },
     { to: '/leaderboard', label: 'Discover', icon: Compass },
+    { to: '/coach-jack',  label: 'Jack',     icon: Bot },
     { to: '/profile', label: 'Profile', icon: User },
   ];
 

@@ -16,6 +16,7 @@ __pycache__/
 env/
 venv/
 .venv/
+ai-pipeline/venv_new/
 pip-log.txt
 pip-delete-this-directory.txt
 .pytest_cache/
@@ -29,3 +30,11 @@ pip-delete-this-directory.txt
 # Prisma
 *.db
 *.db-journal
+
+ai-pipeline-local/venv/
+ai-pipeline-local/uploads/
+__pycache__/
+ 
+.next/
+*.log
+

@@ -16,15 +16,19 @@
     "axios": "^1.19.0",
     "chart.js": "^4.5.1",
     "firebase": "^12.17.1",
+    "leaflet": "^1.9.4",
     "long": "^4.0.0",
     "lucide-react": "^1.31.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.8",
+    "react-globe.gl": "^2.38.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -21,11 +21,15 @@ export default function Navbar() {
     { to: '/sports', label: 'Assessments' },
     { to: '/feed', label: 'Feed' },
     { to: '/leaderboard', label: 'Discover' },
+    { to: '/coach-jack', label: 'Coach Jack' },
+    { to: '/geospatial', label: 'Geo Radar' },
     { to: '/profile', label: 'Profile' },
   ];
 
   const scoutLinks = [
     { to: '/scout/dashboard', label: 'Dashboard' },
+    { to: '/coach-jack', label: 'Coach Jack' },
+    { to: '/geospatial', label: 'Geo Radar' },
   ];
 
   const links = role === 'scout' ? scoutLinks : athleteLinks;

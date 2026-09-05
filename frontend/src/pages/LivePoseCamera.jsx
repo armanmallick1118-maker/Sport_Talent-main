@@ -394,6 +394,7 @@ export default function LivePoseCamera() {
         detectorRef.current = null;
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // -----------------------------------------

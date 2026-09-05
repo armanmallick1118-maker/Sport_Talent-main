@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Color Palette */
+  --bg-primary:    #0A0E1A;    /* deep dark navy */
+  --bg-secondary:  #111827;    /* card backgrounds */
+  --bg-elevated:   #1A2234;    /* elevated surfaces */
+  --bg-glass:      rgba(255,255,255,0.04);
+
+  /* Brand Colors */
+  --accent-green:  #00D68F;    /* fitness/healthy */
+  --accent-blue:   #3B82F6;    /* workout/activity */
+  --accent-orange: #F97316;    /* nutrition/food */
+  --accent-red:    #EF4444;    /* alerts/danger */
+  --accent-purple: #8B5CF6;    /* AI/intelligence */
+  --accent-yellow: #F59E0B;    /* warnings */
+
+  /* Text */
+  --text-primary:  #F1F5F9;
+  --text-secondary:#94A3B8;
+  --text-muted:    #475569;
+
+  /* Score Colors */
+  --score-a:       #00D68F;    /* 90–100: A+ */
+  --score-b:       #3B82F6;    /* 75–89:  B  */
+  --score-c:       #F59E0B;    /* 60–74:  C  */
+  --score-d:       #EF4444;    /* <60:    D  */
+
+  /* Spacing & Radius */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+
+  /* Shadows */
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Cards */
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+/* Common form inputs */
+input, select, textarea {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  width: 100%;
+  transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* Animated score ring */
+@keyframes scoreReveal {
+  from { stroke-dashoffset: 283; }
+  to   { stroke-dashoffset: var(--target-offset); }
+}
+
+/* Progress bars */
+@keyframes growBar {
+  from { width: 0%; }
+  to   { width: var(--target-width); }
+}
+
+/* Fade in up */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Pulse for alerts */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-fade-in { animation: fadeInUp 0.4s ease forwards; }
+.animate-pulse { animation: pulse 2s infinite; }
+
+/* Status indicators */
+.status-normal   { color: var(--accent-green); }
+.status-warning  { color: var(--accent-yellow); }
+.status-critical { color: var(--accent-red); }
+
+/* Pill badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-green  { background: rgba(0,214,143,0.12); color: var(--accent-green); }
+.badge-red    { background: rgba(239,68,68,0.12);  color: var(--accent-red); }
+.badge-yellow { background: rgba(245,158,11,0.12); color: var(--accent-yellow); }
+.badge-blue   { background: rgba(59,130,246,0.12); color: var(--accent-blue); }
+.badge-purple { background: rgba(139,92,246,0.12); color: var(--accent-purple); }
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Advanced SPA CSS */
+.bg-mesh {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(0, 214, 143, 0.1) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.glass-panel {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.15);
+}
+
+.glass-tab {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  padding: 12px 0;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.glass-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.glass-tab.active {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--accent-blue);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+/* Gradient Text */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(to right, #3B82F6, #8B5CF6);
+}

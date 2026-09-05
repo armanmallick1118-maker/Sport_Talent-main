@@ -1,0 +1,7 @@
+# .gitignore, Sensei
+node_modules/
+.env
+firebase-service-account.json
+npm-debug.log*
+.DS_Store
+/generated/prisma

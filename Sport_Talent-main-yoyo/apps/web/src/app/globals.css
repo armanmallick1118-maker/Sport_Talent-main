@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/* ==========================================================
+   PRANA VITAL DESIGN SYSTEM TOKENS
+   Vitality + Intelligence + Movement + Personalization
+   ========================================================== */
+
+:root,
+[data-theme="prana-vital"] {
+  /* Core Surfaces (70% Neutral Surfaces) */
+  --background: #0B100E;
+  --surface: #111815;
+  --surface-elevated: #17201B;
+  --surface-card: #111815;
+  --border: #27332D;
+  --border-subtle: #1C2621;
+  --border-focus: #B7F34A;
+
+  /* Typography Structure (20% Hierarchy) */
+  --foreground: #F3F5F0;
+  --secondary: #A4AEA8;
+  --muted: #74817A;
+
+  /* Meaningful Accents (10% Ratio) */
+  --primary: #B7F34A; /* PRANA GREEN - Vitality, Action, Navigation */
+  --primary-hover: #A5E435;
+  --primary-glow: rgba(183, 243, 74, 0.15);
+  --accent-cyan: #25D9D0; /* PRANA CYAN - Telemetry, Intelligence, Radar */
+  --accent-cyan-hover: #1EBDB5;
+
+  /* Semantic Health & Sports Indicators */
+  --info: #55B9FF;
+  --success: #8BE34B;
+  --warning: #F4B942;
+  --danger: #FF6B6B;
+
+  /* Geometry & Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+/* THEME 02 — AGNI: Warm Athletic Power */
+[data-theme="agni"] {
+  --background: #110C09;
+  --surface: #1A120D;
+  --surface-elevated: #241A13;
+  --surface-card: #1A120D;
+  --border: #3D2B1F;
+  --border-subtle: #2B1D15;
+  --border-focus: #FF8A3D;
+  --foreground: #FAF4F0;
+  --secondary: #BCAEAA;
+  --muted: #8A7B76;
+  --primary: #FF8A3D;
+  --primary-hover: #F27827;
+  --primary-glow: rgba(255, 138, 61, 0.15);
+  --accent-cyan: #FFD166;
+  --accent-cyan-hover: #EDB944;
+}
+
+/* THEME 03 — NEEL: Cool Precision & Performance */
+[data-theme="neel"] {
+  --background: #080E16;
+  --surface: #0E1724;
+  --surface-elevated: #152236;
+  --surface-card: #0E1724;
+  --border: #1E334D;
+  --border-subtle: #142338;
+  --border-focus: #4CC9F0;
+  --foreground: #F0F6FA;
+  --secondary: #A0B2C6;
+  --muted: #6E8299;
+  --primary: #4CC9F0;
+  --primary-hover: #36B5DC;
+  --primary-glow: rgba(76, 201, 240, 0.15);
+  --accent-cyan: #7C9CFF;
+  --accent-cyan-hover: #6787EA;
+}
+
+/* THEME 04 — VAN: Recovery & Forest Biomechanics */
+[data-theme="van"] {
+  --background: #0B120E;
+  --surface: #121E17;
+  --surface-elevated: #182A20;
+  --surface-card: #121E17;
+  --border: #243D2F;
+  --border-subtle: #1A2B21;
+  --border-focus: #79D98A;
+  --foreground: #F1F8F3;
+  --secondary: #A3B8AB;
+  --muted: #728A7C;
+  --primary: #79D98A;
+  --primary-hover: #62C774;
+  --primary-glow: rgba(121, 217, 138, 0.15);
+  --accent-cyan: #B7F34A;
+  --accent-cyan-hover: #A5E435;
+}
+
+/* THEME 05 — SANDHYA: Mental Wellness & Premium Dusk */
+[data-theme="sandhya"] {
+  --background: #110E16;
+  --surface: #1B1524;
+  --surface-elevated: #241D30;
+  --surface-card: #1B1524;
+  --border: #3B2E50;
+  --border-subtle: #291F38;
+  --border-focus: #C7A7FF;
+  --foreground: #F8F5FA;
+  --secondary: #B7AEC4;
+  --muted: #857996;
+  --primary: #C7A7FF;
+  --primary-hover: #B28AF5;
+  --primary-glow: rgba(199, 167, 255, 0.15);
+  --accent-cyan: #6EE7D8;
+  --accent-cyan-hover: #55D4C4;
+}
+
+/* THEME 06 — DAYLIGHT: Clinical Athletic Light */
+[data-theme="daylight"] {
+  --background: #F5F7F3;
+  --surface: #FFFFFF;
+  --surface-elevated: #EBF0E6;
+  --surface-card: #FFFFFF;
+  --border: #D1DDD0;
+  --border-subtle: #E0EAE0;
+  --border-focus: #3F7D20;
+  --foreground: #101512;
+  --secondary: #4F5E55;
+  --muted: #76857C;
+  --primary: #3F7D20;
+  --primary-hover: #326418;
+  --primary-glow: rgba(63, 125, 32, 0.12);
+  --accent-cyan: #087F8C;
+  --accent-cyan-hover: #066772;
+}
+
+/* ==========================================================
+   BASE APPLICATION STYLING
+   ========================================================== */
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.015em;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Crisp scientific cards: solid surfaces, thin borders, NO vibe-coded neon glow */
+.prana-card,
+.athena-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--foreground);
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.prana-card:hover,
+.athena-card:hover {
+  border-color: rgba(183, 243, 74, 0.3);
+}
+
+/* Structured Badges with Meaningful Semantics */
+.badge-clean {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-family: monospace;
+}
+
+.badge-green,
+.badge-emerald {
+  background-color: rgba(183, 243, 74, 0.12);
+  color: var(--primary);
+  border-color: rgba(183, 243, 74, 0.3);
+}
+
+.badge-cyan,
+.badge-blue {
+  background-color: rgba(37, 217, 208, 0.12);
+  color: var(--accent-cyan);
+  border-color: rgba(37, 217, 208, 0.3);
+}
+
+.badge-amber {
+  background-color: rgba(244, 185, 66, 0.12);
+  color: var(--warning);
+  border-color: rgba(244, 185, 66, 0.3);
+}
+
+.badge-rose,
+.badge-danger {
+  background-color: rgba(255, 107, 107, 0.12);
+  color: var(--danger);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+/* Restrained Scientific Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}

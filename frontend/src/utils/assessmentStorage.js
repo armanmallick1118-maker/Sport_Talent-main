@@ -115,7 +115,7 @@ export const startAssessment = async (
 ) => {
   try {
     const response = await API.post(
-      "/api/assessment/start",
+      "/api/v1/assessments/start",
       {
         sport,
         testType,
@@ -145,7 +145,7 @@ export const uploadAssessmentMedia = async (
 ) => {
   try {
     const response = await API.post(
-      "/api/assessment/upload",
+      "/api/v1/assessments/upload",
       {
         assessmentId,
         mediaUrl,
@@ -174,7 +174,7 @@ export const triggerAssessmentAnalysis = async (
 ) => {
   try {
     const response = await API.post(
-      "/api/assessment/analyze",
+      "/api/v1/assessments/analyze",
       {
         assessmentId,
       }
@@ -200,7 +200,7 @@ export const triggerAssessmentAnalysis = async (
 export const getAssessmentDetails = async (id) => {
   try {
     const response = await API.get(
-      `/api/assessment/${id}`
+      `/api/v1/assessments/${id}`
     );
 
     return response.data;
