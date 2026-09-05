@@ -10,7 +10,7 @@ export default defineConfig({
 
   // Dev server proxy — eliminates CORS issues in local development
   server: {
-    port: 5173,
+    port: 3000,
     proxy: {
       // All /api/* requests → Express backend
       "/api": {
