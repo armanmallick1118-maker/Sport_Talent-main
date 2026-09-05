@@ -104,3 +104,23 @@ The flagship web interface is built with **Next.js 16 (Turbopack)**, **React 19*
    node server.js
    ```
    The backend API will run on `http://localhost:8000`.
+
+---
+
+## ☁️ Deploying PRANA Next.js App to Vercel
+
+To deploy the Next.js frontend (`localhost:3000`) directly to Vercel:
+
+1. Import the repository `armanmallick1118-maker/Sport_Talent-main` in [Vercel](https://vercel.com).
+2. Set the **Root Directory** to:
+   ```text
+   Sport_Talent-main-yoyo/apps/web
+   ```
+3. Ensure **Framework Preset** is set to `Next.js`.
+4. In **Environment Variables**, add:
+   - `NEXT_PUBLIC_API_URL`: Your production backend API URL (e.g., on Railway)
+   - `GEMINI_API_KEY`: Your Gemini API Key
+   - `GROQ_API_KEY`: Your Groq API Key
+   - `GROQ_PRIMARY_MODEL`: `openai/gpt-oss-120b`
+   - `GROQ_FALLBACK_MODEL`: `qwen/qwen3.8-27b`
+5. Click **Deploy**. Vercel will build and host your PRANA application.
