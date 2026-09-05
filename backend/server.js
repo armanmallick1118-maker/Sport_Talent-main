@@ -92,6 +92,22 @@ app.get('/', (req, res) => {
   });
 });
 
+// Store last error for diagnostics
+let lastError = null;
+process.on('unhandledRejection', (err) => { lastError = err ? err.message : 'Unknown error'; });
+process.on('uncaughtException', (err) => { lastError = err ? err.message : 'Unknown error'; });
+
+// Diagnostics check
+app.get('/api/diagnostics', (req, res) => {
+  res.status(200).json({
+    db_url_set: !!process.env.DATABASE_URL,
+    db_url_quotes: process.env.DATABASE_URL ? process.env.DATABASE_URL.includes('"') : false,
+    direct_url_set: !!process.env.DIRECT_URL,
+    port: process.env.PORT || 8000,
+    last_error: lastError || 'None',
+  });
+});
+
 // Health check
 app.get('/api/ping', (req, res) => {
   res.status(200).json({ success: true, message: 'Sport Talent API is live.' });
@@ -119,11 +135,9 @@ app.listen(PORT, '0.0.0.0', () => {
 
 
 process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION! Shutting down...', err);
-  process.exit(1);
+  console.error('🔥 UNCAUGHT EXCEPTION! (Not shutting down to diagnose Railway):', err);
 });
 
 process.on('unhandledRejection', (err) => {
-  console.error('UNHANDLED REJECTION! Shutting down...', err);
-  process.exit(1);
+  console.error('🔥 UNHANDLED REJECTION! (Not shutting down to diagnose Railway):', err);
 });
