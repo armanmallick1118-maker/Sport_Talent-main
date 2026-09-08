@@ -6,7 +6,10 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const defaultBackend = process.env.NODE_ENV === "production"
+      ? "https://sporttalent-production.up.railway.app"
+      : "http://127.0.0.1:8000";
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || defaultBackend;
     const cleanHost = backendUrl.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
     return [
       {

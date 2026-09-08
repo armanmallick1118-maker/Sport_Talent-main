@@ -9,6 +9,7 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend start",
     "build": "npm --prefix Sport_Talent-main-yoyo/apps/web run build",
-    "start": "npm --prefix Sport_Talent-main-yoyo/apps/web start"
+    "start": "npm --prefix Sport_Talent-main-yoyo/apps/web start",
+    "vercel-build": "npm --prefix Sport_Talent-main-yoyo/apps/web run build"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "npm --prefix Sport_Talent-main-yoyo/apps/web install",
+  "buildCommand": "npm --prefix Sport_Talent-main-yoyo/apps/web run build",
+  "outputDirectory": "Sport_Talent-main-yoyo/apps/web/.next"
+}
