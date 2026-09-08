@@ -18,8 +18,12 @@ app.use(morgan('dev'));
 
 // CORS — allow frontend origins
 const allowedOrigins = [
-  'http://localhost:3000',     // local Vite dev server (standardized)
-  'http://127.0.0.1:3000',    // local Vite via IP (standardized)
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3001',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
   process.env.FRONTEND_URL,   // set this on Railway/Render in production
 ].filter(Boolean);
 

@@ -264,6 +264,7 @@ export const NutritionView: React.FC = () => {
 
     try {
       const endpoints = [
+        "/api/v1/nutrition/parse",
         "http://localhost:8000/api/v1/nutrition/parse",
         "http://127.0.0.1:8000/api/v1/nutrition/parse",
       ];

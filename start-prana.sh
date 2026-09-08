@@ -26,6 +26,16 @@ fi
 
 echo "PRANA Backend running (PID $BACKEND_PID)"
 echo "PRANA Frontend running (PID $FRONTEND_PID)"
-echo "Visit http://localhost:3000"
+echo "Waiting for PRANA frontend to become ready at http://localhost:3000..."
+
+for i in {1..35}; do
+  if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 | grep -q "200\|304\|307\|308"; then
+    echo "PRANA frontend is live at http://localhost:3000"
+    break
+  fi
+  sleep 1
+done
+
+echo "Access PRANA at http://localhost:3000"
 
 wait

@@ -687,7 +687,7 @@ export const AICoachView: React.FC<AICoachProps> = ({
       const telemetry = gatherAllAppData();
       const token = typeof window !== "undefined" ? localStorage.getItem("athena_token") : null;
 
-      const res = await fetch("http://127.0.0.1:8000/api/v1/ai-suggestions/chat", {
+      const chatPayload = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -699,9 +699,12 @@ export const AICoachView: React.FC<AICoachProps> = ({
           telemetry,
           userVerdict: explicitVerdict || undefined,
         }),
-      });
+      };
 
-      if (res.ok) {
+      const res = await fetch("/api/v1/ai-suggestions/chat", chatPayload)
+        .catch(() => fetch("http://127.0.0.1:8000/api/v1/ai-suggestions/chat", chatPayload));
+
+      if (res && res.ok) {
         const data = await res.json();
         let replyText = data.data?.content || data.reply || data.coach_response;
         if (replyText) {

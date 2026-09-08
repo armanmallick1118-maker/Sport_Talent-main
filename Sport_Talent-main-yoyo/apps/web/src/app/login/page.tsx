@@ -20,10 +20,11 @@ const storeSession = (token: string, user: any) => {
 
 const fetchAuth = async (endpoint: string, options: RequestInit) => {
   const hosts = [
+    '', // 1st priority: relative endpoint handled seamlessly by Next.js proxy rewrite
     typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '',
-    'http://localhost:8000',
     'http://127.0.0.1:8000',
-  ].filter(Boolean);
+    'http://localhost:8000',
+  ];
   const uniqueHosts = Array.from(new Set(hosts));
 
   let lastErr = null;
@@ -35,7 +36,7 @@ const fetchAuth = async (endpoint: string, options: RequestInit) => {
       lastErr = err;
     }
   }
-  throw lastErr || new Error('Failed to connect to backend on port 8000. Please ensure the backend server is running.');
+  throw lastErr || new Error('Backend connection refused on port 8000. Please ensure the backend server is running.');
 };
 
 

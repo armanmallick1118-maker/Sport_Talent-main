@@ -130,20 +130,20 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadBackendData() {
       try {
-        const twinRes = await fetch("http://127.0.0.1:8000/api/v1/twin");
-        if (twinRes.ok) setTwinData(await twinRes.json());
+        const twinRes = await fetch("/api/v1/twin").catch(() => fetch("http://127.0.0.1:8000/api/v1/twin"));
+        if (twinRes && twinRes.ok) setTwinData(await twinRes.json());
       } catch (e) {
         // Fallback already pre-set
       }
 
       try {
-        const recRes = await fetch("http://127.0.0.1:8000/api/v1/coach/recommendation");
-        if (recRes.ok) setRecommendation(await recRes.json());
+        const recRes = await fetch("/api/v1/coach/recommendation").catch(() => fetch("http://127.0.0.1:8000/api/v1/coach/recommendation"));
+        if (recRes && recRes.ok) setRecommendation(await recRes.json());
       } catch (e) {}
 
       try {
-        const readRes = await fetch("http://127.0.0.1:8000/api/v1/recovery/readiness");
-        if (readRes.ok) setReadinessData(await readRes.json());
+        const readRes = await fetch("/api/v1/recovery/readiness").catch(() => fetch("http://127.0.0.1:8000/api/v1/recovery/readiness"));
+        if (readRes && readRes.ok) setReadinessData(await readRes.json());
       } catch (e) {}
     }
     loadBackendData();

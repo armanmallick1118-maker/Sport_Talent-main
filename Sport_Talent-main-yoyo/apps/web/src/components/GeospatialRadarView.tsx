@@ -536,8 +536,9 @@ export const GeospatialRadarView: React.FC = () => {
 
   // Sync with backend geospatial plugin if live
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/v1/plugins/geospatial/heatmap")
-      .then((res) => res.json())
+    fetch("/api/v1/plugins/geospatial/heatmap")
+      .catch(() => fetch("http://127.0.0.1:8000/api/v1/plugins/geospatial/heatmap"))
+      .then((res) => (res ? res.json() : null))
       .then((data) => {
         if (Array.isArray(data)) {
           setBackendHubsCount(data.length);
