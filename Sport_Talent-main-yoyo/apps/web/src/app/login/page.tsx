@@ -18,6 +18,27 @@ const storeSession = (token: string, user: any) => {
   localStorage.setItem('user', JSON.stringify(user));
 };
 
+const fetchAuth = async (endpoint: string, options: RequestInit) => {
+  const hosts = [
+    typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+  ].filter(Boolean);
+  const uniqueHosts = Array.from(new Set(hosts));
+
+  let lastErr = null;
+  for (const host of uniqueHosts) {
+    try {
+      const res = await fetch(`${host}${endpoint}`, options);
+      return res;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error('Failed to connect to backend on port 8000. Please ensure the backend server is running.');
+};
+
+
 export default function Login() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -75,7 +96,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+      const res = await fetchAuth('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -141,7 +162,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/auth/reset-password', {
+      const res = await fetchAuth('/api/v1/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

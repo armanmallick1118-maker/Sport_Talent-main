@@ -22,6 +22,27 @@ const storeSession = (token: string, user: any) => {
   }
 };
 
+const fetchAuth = async (endpoint: string, options: RequestInit) => {
+  const hosts = [
+    typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+  ].filter(Boolean);
+  const uniqueHosts = Array.from(new Set(hosts));
+
+  let lastErr = null;
+  for (const host of uniqueHosts) {
+    try {
+      const res = await fetch(`${host}${endpoint}`, options);
+      return res;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error('Failed to connect to backend on port 8000. Please ensure the backend server is running.');
+};
+
+
 export default function Register() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -81,7 +102,7 @@ export default function Register() {
       const cleanName = formData.fullName.trim();
 
       // 1. Call registration endpoint
-      const regRes = await fetch('http://127.0.0.1:8000/api/v1/auth/register', {
+      const regRes = await fetchAuth('/api/v1/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,7 +149,7 @@ export default function Register() {
 
       // 2. Auto-login the newly created user
       try {
-        const loginRes = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+        const loginRes = await fetchAuth('/api/v1/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
