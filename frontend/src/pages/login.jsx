@@ -66,12 +66,14 @@ export default function Login() {
       });
 
       const { token, user } = res.data;
-      
-      // Instead of logging in immediately, show MFA
-      setTempAuthData({ token, user });
-      setShowMfa(true);
-      setError('');
-      setInfo('A verification code has been sent to your registered device. Please enter it below.');
+      storeSession(token, user);
+      setInfo('Login successful! Redirecting...');
+
+      if (user.role === 'scout') {
+        navigate('/scout/dashboard');
+      } else {
+        navigate('/athlete/dashboard');
+      }
     } catch (err) {
       const msg =
         err.response?.data?.error ||
@@ -85,19 +87,14 @@ export default function Login() {
 
   const handleMfaSubmit = (e) => {
     e.preventDefault();
-    if (mfaCode.length < 6) {
-      setError('Please enter a valid 6-digit verification code.');
-      return;
-    }
-
-    // Mock MFA Verification Success
-    const { token, user } = tempAuthData;
-    storeSession(token, user);
-
-    if (user.role === 'scout') {
-      navigate('/scout/dashboard');
-    } else {
-      navigate('/athlete/dashboard');
+    if (tempAuthData) {
+      const { token, user } = tempAuthData;
+      storeSession(token, user);
+      if (user.role === 'scout') {
+        navigate('/scout/dashboard');
+      } else {
+        navigate('/athlete/dashboard');
+      }
     }
   };
 

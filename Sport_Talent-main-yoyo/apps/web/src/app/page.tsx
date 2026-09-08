@@ -39,7 +39,7 @@ export default function HomePage() {
 
   // If not authenticated, show the Login page first in front
   if (!isAuthenticated) {
-    return <Login />;
+    return <Login onLoginSuccess={() => setIsAuthenticated(true)} />;
   }
 
   // Once authenticated, show the PRANA Home experience
