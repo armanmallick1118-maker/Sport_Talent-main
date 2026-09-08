@@ -7,6 +7,9 @@
     "build": "node build-vercel.js",
     "start": "cd ../apps/web && npm start"
   },
+  "allowScripts": {
+    "unrs-resolver": true
+  },
   "dependencies": {
     "lucide-react": "^1.41.0",
     "next": "16.3.4",
