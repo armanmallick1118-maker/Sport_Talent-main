@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
         source: "/ml/:path*",
         destination: "http://127.0.0.1:8001/:path*",
       },
+      {
+        source: "/cv/:path*",
+        destination: (process.env.CV_MODEL_URL || "http://127.0.0.1:8002") + "/:path*",
+      },
     ];
   },
   async headers() {

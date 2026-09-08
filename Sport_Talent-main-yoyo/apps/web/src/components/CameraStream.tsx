@@ -2,6 +2,10 @@
 import React from 'react';
 
 export default function CameraStream() {
+  const streamUrl = typeof window !== "undefined" && window.location.protocol === "https:"
+    ? "/cv/video_feed"
+    : (process.env.NEXT_PUBLIC_CV_URL ? `${process.env.NEXT_PUBLIC_CV_URL}/video_feed` : "http://127.0.0.1:8002/video_feed");
+
   return (
     <div className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40 backdrop-blur-md">
       <div className="p-4 bg-gradient-to-r from-slate-900 to-indigo-900 flex justify-between items-center border-b border-white/10">
@@ -13,7 +17,7 @@ export default function CameraStream() {
       </div>
       <div className="relative aspect-video bg-black flex items-center justify-center">
         <img 
-          src="http://127.0.0.1:8002/video_feed" 
+          src={streamUrl} 
           alt="OpenCV Camera Stream" 
           className="w-full h-full object-cover"
           onError={(e) => {
