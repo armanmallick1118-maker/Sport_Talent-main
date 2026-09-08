@@ -24,6 +24,22 @@ import {
 
 export const PranaHome: React.FC = () => {
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [athleteName, setAthleteName] = useState('');
+
+  React.useEffect(() => {
+    try {
+      const isIncomplete = localStorage.getItem('prana_profile_incomplete') === 'true';
+      const userStr = localStorage.getItem('user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      const storedName = localStorage.getItem('userName') || user?.fullName || user?.profile?.full_name || '';
+      setAthleteName(storedName);
+
+      if (isIncomplete || (user && user.profileComplete === false)) {
+        setProfileIncomplete(true);
+      }
+    } catch {}
+  }, []);
 
   const handleLogout = () => {
     try {
@@ -102,6 +118,35 @@ export const PranaHome: React.FC = () => {
           </Link>
         </div>
       </header>
+
+      {/* Profile Completion Indicator Banner */}
+      {profileIncomplete && (
+        <div className="w-full bg-gradient-to-r from-[#B7F34A]/20 via-[#25D9D0]/15 to-[#B7F34A]/10 border-b border-[#B7F34A]/40 py-3.5 px-4 sm:px-8 shadow-lg transition-all animate-fadeIn">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#B7F34A]/20 border border-[#B7F34A]/50 flex items-center justify-center shrink-0 shadow-inner">
+                <Sparkles className="w-4 h-4 text-[#B7F34A] animate-pulse" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white flex items-center justify-center sm:justify-start gap-2">
+                  <span>Welcome to PRANA{athleteName ? `, ${athleteName}` : ''}!</span>
+                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-[#B7F34A]/20 border border-[#B7F34A]/40 text-[#B7F34A]">Action Required</span>
+                </p>
+                <p className="text-xs text-[#A4AEA8] mt-0.5">
+                  Your athlete profile is not complete. Please complete your profile details (age, height, weight, sport) to calibrate your digital twin and AI coach.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/dashboard?view=profile"
+              className="px-4 py-2 rounded-xl bg-[#B7F34A] text-[#0B100E] font-bold text-xs font-mono flex items-center gap-2 hover:bg-[#cbf774] shadow-md shadow-[#B7F34A]/20 transition-all shrink-0 cursor-pointer"
+            >
+              <span>COMPLETE PROFILE SECTION</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* =================================================== */}
       {/* B. HERO & STATEMENT                                */}

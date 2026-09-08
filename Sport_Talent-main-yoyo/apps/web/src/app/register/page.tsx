@@ -66,6 +66,15 @@ export default function Register() {
   useEffect(() => {
     setCaptchaNum1(Math.floor(Math.random() * 9) + 1);
     setCaptchaNum2(Math.floor(Math.random() * 9) + 1);
+
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const emailParam = urlParams.get('email');
+      if (emailParam) {
+        setFormData((prev) => ({ ...prev, email: emailParam }));
+        setInfo(`Please complete your registration for ${emailParam}.`);
+      }
+    }
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,6 +158,7 @@ export default function Register() {
       localStorage.setItem('athena_user_profile', JSON.stringify(initialProfile));
 
       // 2. Auto-login the newly created user
+      localStorage.setItem('prana_profile_incomplete', 'true');
       try {
         const loginRes = await fetchAuth('/api/v1/auth/login', {
           method: 'POST',
@@ -161,18 +171,18 @@ export default function Register() {
 
         if (loginRes.ok) {
           const loginData = await loginRes.json();
-          storeSession(loginData.token, { ...loginData.user, fullName: cleanName });
-          // Directly navigate to the profile section for the new user
-          router.push('/?view=profile');
+          storeSession(loginData.token, { ...loginData.user, fullName: cleanName, profileComplete: false });
+          // Navigate to Home page where the profile completion prompt will be displayed
+          window.location.href = '/';
           return;
         }
       } catch (loginErr) {
         console.warn('Auto-login attempt failed:', loginErr);
       }
 
-      // Fallback session & direct profile navigation
-      storeSession('local_session_' + Date.now(), { email, fullName: cleanName, role: 'athlete' });
-      router.push('/?view=profile');
+      // Fallback session & navigate to Home page
+      storeSession('local_session_' + Date.now(), { email, fullName: cleanName, role: 'athlete', profileComplete: false });
+      window.location.href = '/';
     } catch (err: any) {
       const msg = err.message || 'Registration failed. Please check your connection and try again.';
       setError(msg);

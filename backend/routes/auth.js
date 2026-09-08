@@ -12,11 +12,20 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_key_sensei';
 const normalizeEmail = (email) => email.trim().toLowerCase();
 const normalizePassword = (password) => password.trim();
 
+const isProfileComplete = (profile) => {
+  if (!profile) return false;
+  if (profile.completion_percentage && profile.completion_percentage >= 80) return true;
+  if (profile.height && profile.weight && profile.sport) return true;
+  return false;
+};
+
 const toClientUser = (user) => ({
   id: user.id,
   email: user.email,
   role: user.role,
   fullName: user.profile?.full_name || '',
+  profileComplete: isProfileComplete(user.profile),
+  profileCompletionPercentage: user.profile?.completion_percentage || (isProfileComplete(user.profile) ? 100 : 25),
 });
 
 const findUserByEmail = async (email) => {
@@ -39,15 +48,11 @@ const findUserByEmail = async (email) => {
   }
 };
 
-// Rate limiting for auth routes - relaxed for local development & proxy rewrites
+// Rate limiting for auth routes - protects against brute-force attacks while allowing reasonable dev traffic
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 50 : 1000,
-  skip: (req) => {
-    const ip = req.ip || req.connection?.remoteAddress || '';
-    return ip.includes('127.0.0.1') || ip.includes('::1') || ip.includes('localhost') || process.env.NODE_ENV !== 'production';
-  },
-  message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
+  max: 100, // Up to 100 attempts per 15 min per IP
+  message: { error: 'Too many login attempts from this IP. Please try again after 15 minutes for security.' },
 });
 
 // Zod schemas for input validation
@@ -72,27 +77,27 @@ const resetPasswordSchema = z.object({
 // @route   POST /api/v1/auth/register
 router.post('/register', authLimiter, async (req, res) => {
   try {
-    // Validate input
+    // Validate request body
     const validationResult = registerSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({ error: 'Validation failed', details: validationResult.error.issues });
     }
     
     const { full_name, role } = validationResult.data;
-    const email = normalizeEmail(validationResult.data.email);
     const password = normalizePassword(validationResult.data.password);
+    const email = normalizeEmail(validationResult.data.email);
 
-    // Check if user exists
+    // Check if user already exists
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
-      return res.status(409).json({ error: 'This email is already registered. Please sign in instead.' });
+      return res.status(400).json({ error: 'An account with this email already exists. Please log in.' });
     }
 
-    // Hash password
+    // Hash password securely with bcrypt
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Create user and profile
+    // Create user and profile in SQLite/Postgres
     const user = await prisma.user.create({
       data: {
         email,
@@ -101,15 +106,23 @@ router.post('/register', authLimiter, async (req, res) => {
         profile: {
           create: {
             full_name: full_name || '',
+            completion_percentage: 25, // Initial profile requires completion
           }
         }
       },
       include: { profile: true },
     });
 
+    const token = jwt.sign(
+      { uid: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
     res.status(201).json({
-      message: 'User registered successfully, Sensei!',
+      message: 'Account created successfully! Please complete your athlete profile.',
       userId: user.id,
+      token,
       user: toClientUser(user),
     });
   } catch (error) {
@@ -131,84 +144,24 @@ router.post('/login', authLimiter, async (req, res) => {
     const password = normalizePassword(validationResult.data.password);
     const email = normalizeEmail(validationResult.data.email);
 
-    // Instant demo login bypass for fast developer & reviewer evaluation
-    if ((email === 'demo@prana.ai' || email === 'demo@sporttalent.io' || email === 'athlete@prana.ai') && (password === 'password123' || password === 'demo123')) {
-      const demoUser = {
-        id: 'demo-athlete-001',
-        email,
-        role: 'athlete',
-        profile: { full_name: 'PRANA Demo Athlete' },
-      };
-      const token = jwt.sign(
-        { uid: demoUser.id, email: demoUser.email, role: demoUser.role },
-        JWT_SECRET,
-        { expiresIn: '30d' }
-      );
-      return res.status(200).json({
-        success: true,
-        token,
-        user: toClientUser(demoUser),
-      });
-    }
+    const user = await findUserByEmail(email);
 
-    if (email === 'scout@prana.ai' && (password === 'password123' || password === 'demo123')) {
-      const demoScout = {
-        id: 'demo-scout-001',
-        email,
-        role: 'scout',
-        profile: { full_name: 'PRANA Head Scout' },
-      };
-      const token = jwt.sign(
-        { uid: demoScout.id, email: demoScout.email, role: demoScout.role },
-        JWT_SECRET,
-        { expiresIn: '30d' }
-      );
-      return res.status(200).json({
-        success: true,
-        token,
-        user: toClientUser(demoScout),
-      });
-    }
-
-    let user = await findUserByEmail(email);
-
-    // If user does not exist yet in local dev DB, auto-create on login to never lock out developers or testers
+    // If new email occurs that is not in database, reject login and instruct user to sign up
     if (!user) {
-      try {
-        const salt = await bcrypt.genSalt(10);
-        const password_hash = await bcrypt.hash(password || 'password123', salt);
-        const assignedRole = email.includes('scout') || email.includes('coach') ? 'scout' : 'athlete';
-        user = await prisma.user.create({
-          data: {
-            email,
-            password_hash,
-            role: assignedRole,
-            profile: {
-              create: {
-                full_name: email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-              }
-            }
-          },
-          include: { profile: true }
-        });
-        console.log(`✨ Auto-registered new account on login: ${email}`);
-      } catch (seedErr) {
-        console.warn('Auto-seeding user failed:', seedErr.message);
-        return res.status(401).json({ error: 'No account found for this email. Please sign up first.' });
-      }
+      return res.status(404).json({
+        error: 'No account found with this email. Please sign up to create your PRANA account.',
+        notFound: true,
+        email,
+      });
     }
 
-    let isMatch = await bcrypt.compare(password, user.password_hash);
-    // Allow master dev test passwords in local development
-    if (!isMatch && (password === 'password123' || password === 'admin' || password === 'admin123' || password === '123456' || password === 'demo123')) {
-      isMatch = true;
-    }
-
+    // Secure bcrypt password verification
+    const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
-      return res.status(401).json({ error: 'Incorrect password. (Tip: Use password123 for instant dev access)' });
+      return res.status(401).json({ error: 'Incorrect password. Please verify your credentials and try again.' });
     }
 
-    // Create token
+    // Create secure token
     const token = jwt.sign(
       { uid: user.id, email: user.email, role: user.role },
       JWT_SECRET,
