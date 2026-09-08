@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "cd ../apps/web && npm run dev",
-    "build": "cd ../apps/web && npm run build && rm -rf ../../plugin-cv_model/.next && cp -r .next ../../plugin-cv_model/.next && (cp -r public ../../plugin-cv_model/ 2>/dev/null || true)",
+    "build": "node build-vercel.js",
     "start": "cd ../apps/web && npm start"
   },
   "dependencies": {
