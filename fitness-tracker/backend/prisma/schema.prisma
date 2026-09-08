@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════
+// MODEL 1: USER PROFILE
+// ═══════════════════════════════════════════
+model User {
+  id              String         @id @default(uuid())
+  name            String
+  email           String         @unique
+  age             Int?
+  gender          String?        // "male" | "female" | "other"
+  height_cm       Float?
+  weight_kg       Float?
+  goal            String?        // "lose_weight" | "build_muscle" | "stay_fit" | "peak_performance"
+  activity_level  String?        // "sedentary" | "light" | "moderate" | "active" | "very_active"
+  daily_cal_target Float?        // auto-calculated from goal
+  daily_protein_target Float?
+  daily_water_target Float?
+  avatar_color    String?        // hex color for avatar placeholder
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  workouts        WorkoutLog[]
+  nutrition       NutritionLog[]
+  lab_reports     LabReport[]
+  vitals          HealthVital[]
+  fitness_score   FitnessScore?
+  goal_tracking   GoalTracking[]
+}
+
+// ═══════════════════════════════════════════
+// MODEL 2: WORKOUT LOG (PILLAR 1)
+// ═══════════════════════════════════════════
+model WorkoutLog {
+  id            String   @id @default(uuid())
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  date          DateTime @default(now())
+  exercise      String
+  category      String   // "strength" | "cardio" | "flexibility" | "hiit" | "sports" | "yoga"
+  sets          Int?
+  reps          Int?
+  weight_kg     Float?
+  duration_min  Float?
+  distance_km   Float?
+  calories      Float?
+  intensity     String?  // "low" | "medium" | "high"
+  notes         String?
+  created_at    DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════
+// MODEL 3: NUTRITION LOG (PILLAR 2)
+// ═══════════════════════════════════════════
+model NutritionLog {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  date        DateTime @default(now())
+  meal_type   String   // "breakfast" | "lunch" | "dinner" | "snack" | "pre_workout" | "post_workout"
+  food_name   String
+  quantity    String?
+  calories    Float
+  protein_g   Float?
+  carbs_g     Float?
+  fat_g       Float?
+  fiber_g     Float?
+  sugar_g     Float?
+  sodium_mg   Float?
+  water_ml    Float?
+  created_at  DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════
+// MODEL 4: LAB REPORT (PILLAR 3)
+// ═══════════════════════════════════════════
+model LabReport {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  test_date   DateTime
+  panel_name  String   // "CBC" | "Lipid Panel" | "Thyroid" | etc.
+  biomarkers  String   // JSON: [{ name, value, unit, ref_min, ref_max, status }]
+  lab_name    String?
+  doctor      String?
+  notes       String?
+  created_at  DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════
+// MODEL 5: DAILY HEALTH VITALS
+// ═══════════════════════════════════════════
+model HealthVital {
+  id              String   @id @default(uuid())
+  user_id         String
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  date            DateTime @default(now())
+  weight_kg       Float?
+  bmi             Float?
+  resting_hr      Int?
+  blood_pressure  String?  // "120/80"
+  spo2            Float?   // blood oxygen %
+  sleep_hrs       Float?
+  sleep_quality   Int?     // 1–5
+  stress_level    Int?     // 1–10
+  energy_level    Int?     // 1–10
+  mood            String?  // "great" | "good" | "neutral" | "low" | "tired"
+  steps           Int?
+  water_consumed  Float?   // ml
+  created_at      DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════
+// MODEL 6: AI FITNESS SCORE
+// ═══════════════════════════════════════════
+model FitnessScore {
+  id                String   @id @default(uuid())
+  user_id           String   @unique
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  overall_score     Float    @default(0)
+  workout_score     Float    @default(0)
+  nutrition_score   Float    @default(0)
+  health_score      Float    @default(0)
+  grade             String?  // "A+" | "A" | "B+" | "B" | "C+" | "C" | "D" | "F"
+  strengths         String?  // JSON array
+  weaknesses        String?  // JSON array
+  seven_day_plan    String?  // JSON: { day1: {workout, nutrition, health}, ... }
+  critical_alerts   String?  // JSON: [{ type, message, severity }]
+  full_analysis     String?  // Full markdown report from Gemini
+  score_history     String?  // JSON: [{ date, overall, workout, nutrition, health }]
+  data_summary      String?  // JSON: snapshot of data used for last analysis
+  last_updated      DateTime @default(now())
+}
+
+// ═══════════════════════════════════════════
+// MODEL 7: DAILY GOAL TRACKING
+// ═══════════════════════════════════════════
+model GoalTracking {
+  id                  String   @id @default(uuid())
+  user_id             String
+  user                User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  date                DateTime @default(now())
+  workout_completed   Boolean  @default(false)
+  nutrition_completed Boolean  @default(false)
+  
+  @@unique([user_id, date])
+}
