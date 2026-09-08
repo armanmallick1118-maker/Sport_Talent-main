@@ -2,17 +2,11 @@
   "name": "sport-talent-prana-root",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "apps/web"
-  ],
   "scripts": {
-    "dev": "npm run dev --prefix apps/web",
-    "build": "npm run build --prefix apps/web",
-    "start": "npm run start --prefix apps/web"
+    "build": "npm --prefix apps/web run build",
+    "start": "npm --prefix apps/web start"
   },
   "dependencies": {
-    "next": "16.3.4",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "next": "16.3.4"
   }
 }
