@@ -43,14 +43,13 @@ export const PranaHome: React.FC = () => {
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("user");
+      localStorage.clear();
+      sessionStorage.clear();
     } catch {}
-    window.location.replace("/login");
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("prana_auth_change"));
+      window.location.replace("/login");
+    }
   };
 
   const scrollToOrbit = () => {

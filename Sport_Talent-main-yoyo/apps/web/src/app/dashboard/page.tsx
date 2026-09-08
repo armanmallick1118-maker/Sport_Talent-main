@@ -27,27 +27,50 @@ export default function DashboardPage() {
   const [isThemeModalOpen, setIsThemeModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    // Strict Authentication Guard
-    const checkAuth = () => {
+    // Strict Server-Verified Authentication Guard
+    const checkAuth = async () => {
       const token = localStorage.getItem("token");
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      if (!token && isLoggedIn !== "true") {
+      if (!token || typeof token !== "string" || token.length < 20) {
+        try {
+          localStorage.clear();
+          sessionStorage.clear();
+        } catch {}
         window.location.replace("/login");
         return false;
       }
+
+      try {
+        const res = await fetch("/api/v1/auth/verify", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) {
+          try {
+            localStorage.clear();
+            sessionStorage.clear();
+          } catch {}
+          window.location.replace("/login");
+          return false;
+        }
+      } catch {}
       return true;
     };
 
-    if (!checkAuth()) return;
+    checkAuth();
 
-    // Handle bfcache / back-forward navigation after logout
-    const handlePageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) {
-        checkAuth();
-      }
+    // Prevent browser Back button ("undo") / bfcache from restoring authenticated views after logout
+    const handlePageShow = () => {
+      checkAuth();
+    };
+
+    const handlePopState = () => {
+      checkAuth();
     };
 
     window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("popstate", handlePopState);
 
     try {
       const saved = localStorage.getItem("prana_sidebar_collapsed") || localStorage.getItem("athena_sidebar_collapsed");
@@ -84,15 +107,13 @@ export default function DashboardPage() {
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userId");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("user");
+      localStorage.clear();
+      sessionStorage.clear();
     } catch {}
-    // Use replace so current page is removed from history stack, preventing Back button return
-    window.location.replace("/login");
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("prana_auth_change"));
+      window.location.replace("/login");
+    }
   };
 
   // Live state synchronized from FastAPI backend (with immediate mock fallback)

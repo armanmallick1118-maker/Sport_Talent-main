@@ -211,4 +211,40 @@ router.post('/reset-password', authLimiter, async (req, res) => {
   }
 });
 
+// @desc    Verify active session token against database
+// @route   GET /api/v1/auth/verify
+router.get('/verify', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ valid: false, error: 'No authorization token provided' });
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ valid: false, error: 'Token expired or invalid' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.uid },
+      include: { profile: true },
+    });
+
+    if (!user) {
+      return res.status(401).json({ valid: false, error: 'User account no longer exists' });
+    }
+
+    res.status(200).json({
+      valid: true,
+      user: toClientUser(user),
+    });
+  } catch (error) {
+    console.error('Token verification error:', error);
+    res.status(500).json({ valid: false, error: 'Server error during token verification' });
+  }
+});
+
 module.exports = router;
