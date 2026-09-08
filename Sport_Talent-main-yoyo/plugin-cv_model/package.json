@@ -1,0 +1,9 @@
+{
+  "name": "plugin-cv-model-vercel-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bridge to build and deploy PRANA Next.js app on Vercel",
+  "scripts": {
+    "build": "cd ../apps/web && npm install && npm run build && cp -r .next ../plugin-cv_model/.next"
+  }
+}
