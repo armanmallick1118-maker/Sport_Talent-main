@@ -10,18 +10,23 @@ export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-
-      if (!token && isLoggedIn !== "true") {
+    const syncAuth = () => {
+      try {
+        const token = localStorage.getItem("token");
+        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        setIsAuthenticated(Boolean(token || isLoggedIn === "true"));
+      } catch {
         setIsAuthenticated(false);
-      } else {
-        setIsAuthenticated(true);
       }
-    } catch {
-      setIsAuthenticated(false);
-    }
+    };
+
+    syncAuth();
+    window.addEventListener("storage", syncAuth);
+    window.addEventListener("prana_auth_change", syncAuth);
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+      window.removeEventListener("prana_auth_change", syncAuth);
+    };
   }, []);
 
   if (isAuthenticated === null) {
