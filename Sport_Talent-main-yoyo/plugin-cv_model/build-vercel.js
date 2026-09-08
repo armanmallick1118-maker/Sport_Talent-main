@@ -27,4 +27,12 @@ if (fs.existsSync(srcPublic)) {
   fs.cpSync(srcPublic, destPublic, { recursive: true });
 }
 
+const srcVercel = path.join(webDir, '.vercel');
+const destVercel = path.join(modelDir, '.vercel');
+if (fs.existsSync(srcVercel)) {
+  console.log(`--> Syncing .vercel output: ${srcVercel} -> ${destVercel}`);
+  fs.rmSync(destVercel, { recursive: true, force: true });
+  fs.cpSync(srcVercel, destVercel, { recursive: true });
+}
+
 console.log('\n=== Vercel build and artifact sync completed successfully! ===\n');

@@ -2,6 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "npm install --loglevel=error && cd ../apps/web && npm install --loglevel=error",
-  "buildCommand": "node build-vercel.js",
-  "outputDirectory": ".next"
+  "buildCommand": "node build-vercel.js"
 }
