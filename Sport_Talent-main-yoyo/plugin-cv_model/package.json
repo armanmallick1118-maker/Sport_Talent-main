@@ -1,9 +1,25 @@
 {
   "name": "plugin-cv-model-vercel-bridge",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
-  "description": "Bridge to build and deploy PRANA Next.js app on Vercel",
   "scripts": {
-    "build": "cd ../apps/web && npm install && npm run build && cp -r .next ../plugin-cv_model/.next"
+    "dev": "cd ../apps/web && npm run dev",
+    "build": "cd ../apps/web && npm run build && cp -r .next ../plugin-cv_model/.next",
+    "start": "cd ../apps/web && npm start"
+  },
+  "dependencies": {
+    "lucide-react": "^1.41.0",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }
