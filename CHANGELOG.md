@@ -12,7 +12,7 @@ This document serves as the master record of all technologies, libraries, archit
 | **Next.js 14** | App Router (`apps/web`) | Primary athlete dashboard, server/client component orchestration, fast SSR, and client-side routing (`localhost:3000`). |
 | **React 18** | Client UI Library | Component hierarchy, state hooks (`useState`, `useEffect`, `useRef`), and reactive telemetry binding. |
 | **TypeScript** | Static Typing | Strict interfaces for athlete biometrics, digital twin scores, radar pings, and API payloads. |
-| **Vite 5** | ESM Bundler (`frontend`) | Rapid-development client interface with instant Hot Module Replacement (HMR) (`localhost:5173`). |
+| **Vite 5** | ESM Bundler (`frontend`) | Rapid-development client interface with instant Hot Module Replacement (HMR) (`localhost:3000`). |
 | **TailwindCSS** | CSS Framework | Utility-first styling, responsive dark-mode slate theme, custom glows, and glassmorphism. |
 | **Recharts** | Data Visualization | 8-Axis Digital Twin Radar Charts, longitudinal progress curves, and readiness bar charts. |
 | **Lucide React** | Iconography | Modern, clean feather icon suite used throughout dashboards, sidebars, and HUD cards. |

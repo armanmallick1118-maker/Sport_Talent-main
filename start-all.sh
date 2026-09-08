@@ -70,8 +70,8 @@ PIDS+=($!)
 echo -e "${GREEN}  ✅ Backend PID: $!${NC}"
 sleep 2
 
-# ── 3. Frontend (Vite on :5173) ───────────────────────────────
-echo -e "${CYAN}[3/3]${NC} Starting ${BOLD}Frontend${NC} (React + Vite) on port ${BOLD}5173${NC}..."
+# ── 3. Frontend (Vite on :3000) ───────────────────────────────
+echo -e "${CYAN}[3/3]${NC} Starting ${BOLD}Frontend${NC} (React + Vite) on port ${BOLD}3000${NC}..."
 cd "$FRONTEND_DIR"
 if [ ! -d node_modules ]; then
   echo -e "${YELLOW}  ⚠  node_modules missing — running npm install...${NC}"
@@ -87,7 +87,7 @@ echo ""
 echo -e "${BOLD}${GREEN}╔══════════════════════════════════════════════╗${NC}"
 echo -e "${BOLD}${GREEN}║         🚀 All Services Running!             ║${NC}"
 echo -e "${BOLD}${GREEN}╠══════════════════════════════════════════════╣${NC}"
-echo -e "${BOLD}${GREEN}║  🌐 Frontend       → http://localhost:5173   ║${NC}"
+echo -e "${BOLD}${GREEN}║  🌐 Frontend       → http://localhost:3000   ║${NC}"
 echo -e "${BOLD}${GREEN}║  ⚙️  Backend        → http://localhost:8000   ║${NC}"
 echo -e "${BOLD}${GREEN}║  🤖 MediaPipeline  → http://localhost:8001   ║${NC}"
 echo -e "${BOLD}${GREEN}║  📄 API Docs       → http://localhost:8001/docs ║${NC}"

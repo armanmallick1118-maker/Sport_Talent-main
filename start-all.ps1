@@ -7,7 +7,7 @@ $ai = Join-Path $root "ai-pipeline"
 
 Write-Host ""
 Write-Host "SportTalent local stack" -ForegroundColor Cyan
-Write-Host "Frontend:      http://localhost:5173"
+Write-Host "Frontend:      http://localhost:3000"
 Write-Host "Backend API:   http://localhost:8000"
 Write-Host "MediaPipeline: http://localhost:8001"
 Write-Host ""
@@ -44,4 +44,4 @@ if (Test-Path $aiPython) {
 }
 
 Write-Host "Started backend process $($backendProcess.Id) and frontend process $($frontendProcess.Id)." -ForegroundColor Green
-Write-Host "Open http://localhost:5173 in your browser."
+Write-Host "Open http://localhost:3000 in your browser."

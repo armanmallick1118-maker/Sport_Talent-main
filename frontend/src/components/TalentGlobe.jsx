@@ -26,7 +26,7 @@ const TalentGlobe = () => {
 
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/v1/plugins/geospatial/heatmap');
+        const response = await fetch('/api/v1/plugins/geospatial/heatmap');
         if (response.ok) {
           const result = await response.json();
           // If backend has no data, use mock data

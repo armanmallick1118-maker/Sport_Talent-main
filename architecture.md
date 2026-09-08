@@ -8,7 +8,7 @@ The **ATHENA & Sport Talent Platform** is a distributed, multi-tier sports scien
 flowchart TB
     subgraph Client_Tier ["Client & Presentation Tier"]
         WEB["ATHENA Unified Web App<br/>(Next.js 14 / React / Tailwind / Recharts)<br/>Port: 3000"]
-        VITE["Legacy Athlete Portal<br/>(Vite / React / React-Globe)<br/>Port: 5173"]
+        VITE["Legacy Athlete Portal<br/>(Vite / React / React-Globe)<br/>Port: 3000"]
     end
 
     subgraph Gateway_Tier ["API & Orchestration Tier"]
@@ -72,7 +72,7 @@ The platform operates across four primary operational ports, ensuring fault tole
 | **Next.js Unified Web App** | `3000` | Next.js 14, React 18, TypeScript, TailwindCSS, Recharts, Lucide | Core athlete dashboard, Digital Twin, Coach Jack interface, Geospatial 360° Radar, and Video Kinematics portal. |
 | **Express.js Backend API** | `8000` | Node.js, Express, Helmet, Morgan, Prisma, SQLite | Secure JWT authentication, athlete profiles, physical assessment history, and dynamic modular plugin routes. |
 | **Athena Motion CV Service** | `8002` | Python 3.10+, Flask, OpenCV (`cv2`), MediaPipe Pose (33 keypoints) | Live webcam streaming, local video frame extraction, joint angle trigonometry, and rep count validation. |
-| **Vite Athlete Client** | `5173` | React, Vite, Three.js, React-Globe | Legacy 3D globe visualization and cross-platform athlete onboarding. |
+| **Vite Athlete Client** | `3000` | React, Vite, Three.js, React-Globe | Legacy 3D globe visualization and cross-platform athlete onboarding. |
 
 ---
 
