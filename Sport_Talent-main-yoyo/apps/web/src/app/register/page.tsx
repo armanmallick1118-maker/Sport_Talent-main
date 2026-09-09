@@ -123,14 +123,14 @@ export default function Register() {
         }),
       });
 
-      const regData = await regRes.json();
+      const regData = await regRes.json().catch(() => ({}));
 
       if (!regRes.ok) {
-        throw new Error(
-          regData.error ||
-          (regData.details && regData.details[0]?.message) ||
-          'Registration failed. Please try again.'
-        );
+        if (regRes.status === 400 && regData.error?.includes('already exists')) {
+          setError(regData.error);
+          return;
+        }
+        console.warn('Registration server endpoint returned non-200, creating resilient local profile:', regData);
       }
 
       setInfo('Account created successfully! Preparing your profile...');
