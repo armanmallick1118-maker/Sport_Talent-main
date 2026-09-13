@@ -1,0 +1,21 @@
+{
+  "users": {},
+  "labReports": [
+    {
+      "id": "eef4f73b-200c-41de-999f-bbb6b861bc8d",
+      "user_id": "default-athlete",
+      "test_date": "2026-09-05",
+      "panel_name": "Hematology (CBC)",
+      "biomarkers": "[{\"name\":\"Hemoglobin\",\"value\":\"15.2\",\"unit\":\"g/dL\",\"status\":\"normal\"},{\"name\":\"Platelet Count\",\"value\":\"250000\",\"unit\":\"cells/mcL\",\"status\":\"normal\"}]",
+      "lab_name": "",
+      "doctor": "",
+      "notes": "",
+      "created_at": "2026-09-05T11:49:06.100Z"
+    }
+  ],
+  "fitnessScores": {},
+  "vitals": [],
+  "workouts": [],
+  "nutrition": [],
+  "goals": []
+}
