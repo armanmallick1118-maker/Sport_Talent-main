@@ -1,0 +1,51 @@
+# ============================================================
+# MediaPipeline — Athlete Motion Tracking System
+# Requirements File — Step 1
+# ============================================================
+
+# ── Core Computer Vision ────────────────────────────────────
+mediapipe==0.10.14               # Pose estimation — 33 landmarks
+opencv-python-headless==4.10.0.84         # Frame extraction & visualization (headless for server)
+opencv-contrib-python-headless==4.10.0.84 # Required by mediapipe (headless)
+
+# ── Person Detection ─────────────────────────────────────────
+ultralytics==8.3.40         # YOLOv8 — person bounding box detection
+
+# ── API Framework ────────────────────────────────────────────
+fastapi==0.115.6            # Async REST API framework
+uvicorn[standard]==0.32.1   # ASGI server
+python-multipart==0.0.12    # Multipart file upload support
+aiofiles==24.1.0            # Async file I/O for streaming
+
+# ── Data Validation ──────────────────────────────────────────
+pydantic==2.13.4            # Request/response models & validation
+pydantic-settings==2.7.0    # Settings management from .env
+email-validator==2.2.0      # Required by pydantic for EmailStr fields
+
+# ── Numerical & Signal Processing ────────────────────────────
+numpy==1.26.4                    # Array ops — pinned: ultralytics macOS requires <2, mediapipe works with 1.26.x
+scipy==1.13.1               # Savitzky-Golay smoothing, signal processing
+pandas==2.2.3               # CSV export, data manipulation
+
+# ── Visualization ────────────────────────────────────────────
+matplotlib==3.9.4           # 3D skeleton plots
+Pillow==11.1.0              # Image handling, GIF export
+imageio==2.36.1             # Video/GIF reading & writing (used by visualizer)
+imageio-ffmpeg==0.5.1       # FFmpeg backend for imageio
+
+# ── Logging ──────────────────────────────────────────────────
+loguru==0.7.3               # Structured logging
+
+# ── Rate Limiting ────────────────────────────────────────────
+slowapi==0.1.9              # FastAPI rate limiter
+
+# ── HTTP Client (for webhooks & testing) ─────────────────────
+httpx==0.28.1               # Async HTTP client + TestClient
+
+# ── Testing ──────────────────────────────────────────────────
+pytest==8.3.4               # Test framework
+pytest-asyncio==0.24.0      # Async test support
+pytest-cov==6.0.0           # Coverage reports
+
+# ── Environment ──────────────────────────────────────────────
+python-dotenv==1.0.1        # Load .env variables
