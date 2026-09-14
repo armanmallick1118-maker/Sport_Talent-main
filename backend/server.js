@@ -132,8 +132,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📡 Accepting requests from: ${allowedOrigins.join(', ')}\n`);
 
   // Start daily sports news cron job
-  const { startNewsCron } = require('./jobs/newsCron');
-  startNewsCron();
+  // const { startNewsCron } = require('./jobs/newsCron');
+  // startNewsCron();
 });
 
 
