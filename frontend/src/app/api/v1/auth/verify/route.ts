@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization') || '';
@@ -16,6 +19,7 @@ export async function POST(req: NextRequest) {
       headers: {
         'authorization': authHeader,
       },
+      cache: 'no-store', // Prevent Next.js from caching the backend's response!
     });
 
     const data = await backendRes.json().catch(() => ({}));
