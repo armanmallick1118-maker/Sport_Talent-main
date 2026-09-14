@@ -1,38 +1,45 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { registerNewUser } from '@/lib/server-auth';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
-    const { email, password, full_name, role } = body;
-
-    if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    
+    // Get backend URL
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '';
+    if (!backendUrl) {
+      return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 });
     }
+    
+    // Proxy request to real backend
+    const backendRes = await fetch(`${backendUrl}/api/v1/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
-    }
+    const data = await backendRes.json().catch(() => ({}));
 
-    const result = registerNewUser(email, password, full_name, role || 'athlete');
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: result.status });
+    if (!backendRes.ok) {
+      return NextResponse.json({ error: data.error || 'Registration failed', details: data.details }, { status: backendRes.status });
     }
 
     const response = NextResponse.json({
-      message: 'Account created successfully! Please complete your athlete profile.',
-      userId: result.user.id,
-      token: result.token,
-      user: result.user,
+      message: data.message || 'Account created successfully! Please complete your athlete profile.',
+      userId: data.userId || (data.user && data.user.id),
+      token: data.token,
+      user: data.user,
     }, { status: 201 });
 
-    response.cookies.set('token', result.token!, {
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60,
-      sameSite: 'lax',
-      httpOnly: false,
-    });
+    if (data.token) {
+      response.cookies.set('token', data.token, {
+        path: '/',
+        maxAge: 30 * 24 * 60 * 60,
+        sameSite: 'lax',
+        httpOnly: false,
+      });
+    }
 
     return response;
   } catch (err: any) {

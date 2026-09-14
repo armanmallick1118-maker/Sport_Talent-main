@@ -1,29 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyToken } from '@/lib/server-auth';
 
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-
-    if (!token) {
-      return NextResponse.json({ valid: false, error: 'No token provided' }, { status: 401 });
+    
+    // Get backend URL
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '';
+    if (!backendUrl) {
+      return NextResponse.json({ valid: false, error: 'Backend URL not configured' }, { status: 500 });
     }
 
-    const payload = verifyToken(token);
-
-    if (!payload) {
-      return NextResponse.json({ valid: false, error: 'Token expired or invalid' }, { status: 401 });
-    }
-
-    return NextResponse.json({
-      valid: true,
-      user: {
-        id: payload.uid,
-        email: payload.email,
-        role: payload.role,
+    // Proxy request to real backend (backend expects GET for verify)
+    const backendRes = await fetch(`${backendUrl}/api/v1/auth/verify`, {
+      method: 'GET',
+      headers: {
+        'authorization': authHeader,
       },
-    }, { status: 200 });
+    });
+
+    const data = await backendRes.json().catch(() => ({}));
+
+    if (!backendRes.ok) {
+      return NextResponse.json({ valid: false, error: data.error || 'Verification error' }, { status: backendRes.status });
+    }
+
+    return NextResponse.json(data, { status: 200 });
   } catch (err: any) {
     return NextResponse.json({ valid: false, error: err.message || 'Verification error' }, { status: 500 });
   }
