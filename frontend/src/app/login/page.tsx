@@ -222,28 +222,6 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
       const { token, user } = data;
       handleLoginSuccess(token, user);
     } catch (err: any) {
-      // Offline fallback for known test accounts or dev emergency
-      const isKnownDemo =
-        cleanEmail === 'athlete@prana.ai' ||
-        cleanEmail === 'scout@prana.ai' ||
-        cleanEmail === 'arman.mallick1118@gmail.com' ||
-        cleanPassword === 'Athlete123!' ||
-        cleanPassword === 'PRANA2026!' ||
-        cleanPassword === 'Liza@2107';
-
-      if (isKnownDemo) {
-        const isArman = cleanEmail === 'arman.mallick1118@gmail.com';
-        const isScout = cleanEmail.includes('scout');
-        handleLoginSuccess('prana_session_' + Date.now(), {
-          id: isArman ? 'usr_arman' : 'usr_demo',
-          email: cleanEmail,
-          role: isScout ? 'scout' : 'athlete',
-          fullName: isArman ? 'Arman' : (isScout ? 'Coach Jack' : 'Kavya Sharma'),
-          profileComplete: isArman ? false : true,
-          profileCompletionPercentage: isArman ? 25 : 100,
-        });
-        return;
-      }
       const msg = err.message || 'Login failed. Please check your credentials and connection.';
       setError(msg);
       generateCaptcha();
