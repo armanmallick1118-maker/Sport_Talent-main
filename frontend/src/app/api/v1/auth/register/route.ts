@@ -5,19 +5,23 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     
     // Get backend URL
-    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '';
-    if (!backendUrl) {
-      return NextResponse.json({ error: 'Backend URL not configured' }, { status: 500 });
-    }
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     
     // Proxy request to real backend
-    const backendRes = await fetch(`${backendUrl}/api/v1/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+    let backendRes;
+    try {
+      backendRes = await fetch(`${backendUrl}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (fetchErr: any) {
+      return NextResponse.json({
+        error: 'Backend server is unreachable at ' + backendUrl + '. Please ensure the backend is running.',
+      }, { status: 503 });
+    }
 
     const data = await backendRes.json().catch(() => ({}));
 
