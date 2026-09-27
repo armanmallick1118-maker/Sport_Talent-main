@@ -17,7 +17,6 @@ RUN npm ci || npm install
 COPY . ./
 
 # Generate Prisma Client for Supabase
-RUN npx prisma generate
-
+# Railway exposes the port dynamically
 # Start the Node.js server
 CMD ["npm", "run", "start"]

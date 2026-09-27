@@ -50,3 +50,9 @@ pip-log.txt
 # Prisma & DB
 *.db
 *.db-journal
+
+# Other branch archives and scratch directories
+Sport_Talent-main-yoyo/
+Sport_Talent-main-Fitness-Tracker/
+ai-pipeline-local/
+pritha-mediapipe-main/
