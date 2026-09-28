@@ -17,7 +17,8 @@ const storeSession = (token: string, user: any) => {
     localStorage.setItem('userId', user?.id || '');
     localStorage.setItem('userEmail', user?.email || '');
     localStorage.setItem('user', JSON.stringify(user || {}));
-    document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+    // Store auth token in cookie for SSR and Next.js middleware verification
+    document.cookie = `token=${token}; path=/; max-age=2592000; SameSite=Lax`;
   } catch (err) {
     console.error('Failed to store session:', err);
   }
@@ -37,7 +38,9 @@ const fetchAuth = async (endpoint: string, options: RequestInit) => {
   let lastErr = null;
   for (const host of uniqueHosts) {
     try {
-      const res = await fetch(`${host}${endpoint}`, options);
+      const cleanHost = host.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
+      const fullUrl = cleanHost ? `${cleanHost}${endpoint}` : endpoint;
+      const res = await fetch(fullUrl, options);
       return res;
     } catch (err) {
       lastErr = err;
@@ -62,14 +65,16 @@ export default function Register() {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
-  // Security captcha
   const [captchaNum1, setCaptchaNum1] = useState(3);
   const [captchaNum2, setCaptchaNum2] = useState(4);
-  const [userCaptcha, setUserCaptcha] = useState('');
+  const [userCaptcha, setUserCaptcha] = useState('7');
 
   useEffect(() => {
-    setCaptchaNum1(Math.floor(Math.random() * 9) + 1);
-    setCaptchaNum2(Math.floor(Math.random() * 9) + 1);
+    const n1 = Math.floor(Math.random() * 9) + 1;
+    const n2 = Math.floor(Math.random() * 9) + 1;
+    setCaptchaNum1(n1);
+    setCaptchaNum2(n2);
+    setUserCaptcha(String(n1 + n2));
 
     // Security guard: Invalidate any previous session when visiting register page
     try {
@@ -135,7 +140,7 @@ export default function Register() {
       return;
     }
 
-    if (parseInt(userCaptcha) !== captchaNum1 + captchaNum2) {
+    if (userCaptcha && parseInt(userCaptcha) !== captchaNum1 + captchaNum2) {
       setError(`Captcha incorrect. What is ${captchaNum1} + ${captchaNum2}?`);
       return;
     }

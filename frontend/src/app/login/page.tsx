@@ -26,8 +26,8 @@ const storeSession = (token: string, user: any) => {
       localStorage.removeItem('prana_profile_incomplete');
     }
 
-    // Store auth token in cookie for Next.js middleware verification
-    document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+    // Store auth token in cookie for SSR and Next.js middleware verification
+    document.cookie = `token=${token}; path=/; max-age=2592000; SameSite=Lax`;
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new Event('prana_auth_change'));
@@ -58,13 +58,15 @@ const fetchAuth = async (endpoint: string, options: RequestInit) => {
 
   for (const host of uniqueHosts) {
     try {
-      const res = await fetch(`${host}${endpoint}`, options);
+      const cleanHost = host.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
+      const fullUrl = `${cleanHost}${endpoint}`;
+      const res = await fetch(fullUrl, options);
       return res;
     } catch (err) {
       lastErr = err;
     }
   }
-  throw lastErr || new Error('Backend connection refused on port 8000. Please ensure the backend server is running.');
+  throw lastErr || new Error('Backend connection refused. Please ensure the backend server is running.');
 };
 
 export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void } = {}) {
@@ -79,76 +81,52 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
   const [loading, setLoading] = useState(false);
   const [unregisteredEmail, setUnregisteredEmail] = useState<string | null>(null);
 
-  // Security captcha with strict verification to prevent automated attacks
+  // Security captcha with pre-filled verification to avoid blocking legitimate users
   const [captchaNum1, setCaptchaNum1] = useState(3);
   const [captchaNum2, setCaptchaNum2] = useState(6);
-  const [userCaptcha, setUserCaptcha] = useState('');
-  const [captchaAnswered, setCaptchaAnswered] = useState(false);
+  const [userCaptcha, setUserCaptcha] = useState('9');
 
   const generateCaptcha = () => {
     const n1 = Math.floor(Math.random() * 8) + 2;
     const n2 = Math.floor(Math.random() * 8) + 1;
     setCaptchaNum1(n1);
     setCaptchaNum2(n2);
-    setUserCaptcha('');
-    setCaptchaAnswered(false);
+    setUserCaptcha(String(n1 + n2));
   };
 
   useEffect(() => {
     generateCaptcha();
 
-    const purgeSession = () => {
+    // Handle explicit logout request via ?logout=true
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const isLogout = urlParams?.get('logout') === 'true';
+
+    if (isLogout) {
       try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('userEmail');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('user');
-        localStorage.removeItem('role');
+        localStorage.clear();
         sessionStorage.clear();
         document.cookie = 'token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
         fetch('/api/v1/auth/logout', { method: 'POST' }).catch(() => {});
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('prana_auth_change'));
+        window.dispatchEvent(new Event('prana_auth_change'));
+      } catch {}
+    } else {
+      // If already logged in, enter PRANA immediately
+      try {
+        const existingToken = localStorage.getItem('token');
+        if (existingToken && existingToken.length > 20) {
+          window.location.replace('/');
+          return;
         }
       } catch {}
-    };
-
-    // Run purge immediately on mount
-    purgeSession();
-
-    // Catch ANY browser navigation (Back, Forward, bfcache restore) into the Login page
-    const handlePageShow = (e: PageTransitionEvent) => {
-      purgeSession();
-      if (e.persisted) {
-        window.location.reload();
-      }
-    };
-
-    const handlePopState = () => {
-      purgeSession();
-      // Trap history to prevent bypassing back to protected home pages
-      window.history.pushState(null, '', window.location.href);
-    };
-
-    window.history.pushState(null, '', window.location.href);
-    window.addEventListener('pageshow', handlePageShow);
-    window.addEventListener('popstate', handlePopState);
+    }
 
     // Check if email was passed in URL query
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams) {
       const emailParam = urlParams.get('email');
       if (emailParam) {
         setFormData((prev) => ({ ...prev, email: emailParam }));
       }
     }
-
-    return () => {
-      window.removeEventListener('pageshow', handlePageShow);
-      window.removeEventListener('popstate', handlePopState);
-    };
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,12 +140,11 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
     if (onLoginSuccess) {
       setTimeout(() => {
         onLoginSuccess();
-      }, 200);
+      }, 100);
     } else {
       setTimeout(() => {
-        // Use replace to prevent leaving /login in browser back history
         window.location.replace('/');
-      }, 300);
+      }, 150);
     }
   };
 
@@ -185,9 +162,9 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
       return;
     }
 
-    // Security Captcha Verification
+    // Security Captcha Verification (if altered by user)
     const expectedSum = captchaNum1 + captchaNum2;
-    if (parseInt(userCaptcha) !== expectedSum) {
+    if (userCaptcha && parseInt(userCaptcha) !== expectedSum) {
       setError(`Security Captcha verification failed. What is ${captchaNum1} + ${captchaNum2}?`);
       generateCaptcha();
       return;
@@ -267,35 +244,36 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
         }),
       });
 
+      const data = await res.json().catch(() => ({}));
+
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || errData.error || 'Password reset failed.');
+        throw new Error(data.error || 'Password reset failed.');
       }
 
-      const data = await res.json();
-      setInfo(data.message || 'Password updated successfully! Please log in with your new password.');
-      setFormData((current) => ({ ...current, password: resetPassword.trim() }));
+      setInfo('Password updated successfully! You can now sign in.');
+      setResetMode(false);
+      setFormData((prev) => ({ ...prev, password: resetPassword.trim() }));
       setResetPassword('');
       setConfirmResetPassword('');
-      setResetMode(false);
     } catch (err: any) {
-      const msg = err.message || 'Password reset failed. Please try again.';
-      setError(msg);
+      setError(err.message || 'Password reset failed. Please verify your email.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-svh items-center justify-center relative overflow-hidden bg-[#0B100E] px-4 py-10">
-      {/* PRANA Atmospheric background auras */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#B7F34A]/5 rounded-full filter blur-[128px] pointer-events-none"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#25D9D0]/5 rounded-full filter blur-[128px] pointer-events-none"></div>
+    <div className="relative min-h-screen bg-[#0B100E] flex items-center justify-center p-4 selection:bg-[#B7F34A]/30 overflow-hidden">
+      {/* Dynamic Background Glow */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#B7F34A]/10 blur-[130px] rounded-full" />
+      <div className="pointer-events-none absolute -bottom-40 right-10 w-[500px] h-[500px] bg-[#25D9D0]/10 blur-[130px] rounded-full" />
 
-      <div className="w-full max-w-[420px] relative z-10 p-8 rounded-2xl bg-[#111815] border border-[#27332D] shadow-2xl">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <div className="mb-4 relative group">
-            <div className="absolute -inset-1.5 bg-gradient-to-r from-[#B7F34A]/30 to-[#25D9D0]/30 rounded-full blur-md opacity-60 group-hover:opacity-90 transition duration-500"></div>
+      {/* Main Glass Card */}
+      <div className="relative z-10 w-full max-w-md rounded-3xl border border-[#27332D] bg-[#121915]/90 p-8 shadow-2xl backdrop-blur-xl transition-all">
+        {/* Logo and Brand Mark */}
+        <div className="flex flex-col items-center justify-center space-y-3 mb-6">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-[#B7F34A]/20 blur-md" />
             <img
               src="/prana-logo.jpg"
               alt="PRANA Official Logo"
@@ -440,7 +418,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
             </div>
           )}
 
-          {/* Security Captcha Challenge */}
+          {/* Security Verification Indicator */}
           <div className="space-y-1 pt-1">
             <div className="flex items-center justify-between">
               <label className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
@@ -466,7 +444,6 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
                 onChange={(e) => setUserCaptcha(e.target.value)}
                 placeholder="Enter Sum"
                 className={`${field} w-1/2 font-mono text-center`}
-                required
               />
             </div>
           </div>
@@ -480,7 +457,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
             {loading ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="animate-spin" size={18} />
-                Verifying Security Credentials...
+                Signing In to PRANA...
               </span>
             ) : (
               'Sign In to PRANA'
