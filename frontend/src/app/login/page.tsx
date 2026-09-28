@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck, CheckCircle2, UserPlus, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Loader2, ShieldCheck, CheckCircle2, UserPlus, AlertCircle, RotateCcw } from 'lucide-react';
 import BrandMark from '../../components/BrandMark';
 
 const field =
@@ -81,7 +81,24 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
   const [loading, setLoading] = useState(false);
   const [unregisteredEmail, setUnregisteredEmail] = useState<string | null>(null);
 
+  // Security Captcha Challenge State
+  const [captchaNum1, setCaptchaNum1] = useState(3);
+  const [captchaNum2, setCaptchaNum2] = useState(5);
+  const [userCaptcha, setUserCaptcha] = useState('');
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+
+  const generateCaptcha = () => {
+    const n1 = Math.floor(Math.random() * 8) + 2; // 2 to 9
+    const n2 = Math.floor(Math.random() * 8) + 1; // 1 to 8
+    setCaptchaNum1(n1);
+    setCaptchaNum2(n2);
+    setUserCaptcha('');
+    setCaptchaVerified(false);
+  };
+
   useEffect(() => {
+    generateCaptcha();
+
     // Handle explicit logout request via ?logout=true
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const isLogout = urlParams?.get('logout') === 'true';
@@ -118,6 +135,20 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleCaptchaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setUserCaptcha(val);
+    const parsed = parseInt(val.trim(), 10);
+    if (!isNaN(parsed) && parsed === captchaNum1 + captchaNum2) {
+      setCaptchaVerified(true);
+      if (error && (error.includes('captcha') || error.includes('Captcha') || error.includes('Security'))) {
+        setError('');
+      }
+    } else {
+      setCaptchaVerified(false);
+    }
+  };
+
   const handleLoginSuccess = (token: string, user: any) => {
     storeSession(token, user);
     setInfo('Authentication verified! Entering PRANA...');
@@ -144,6 +175,16 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
 
     if (!cleanEmail || !cleanPassword) {
       setError('Please provide both email and password.');
+      return;
+    }
+
+    // Security Captcha Verification
+    const expectedSum = captchaNum1 + captchaNum2;
+    const parsedUserCaptcha = parseInt(userCaptcha.trim(), 10);
+
+    if (!userCaptcha.trim() || isNaN(parsedUserCaptcha) || parsedUserCaptcha !== expectedSum) {
+      setError(`Security Verification Failed: Please enter the correct sum for ${captchaNum1} + ${captchaNum2}.`);
+      generateCaptcha();
       return;
     }
 
@@ -180,6 +221,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
     } catch (err: any) {
       const msg = err.message || 'Login failed. Please check your credentials and connection.';
       setError(msg);
+      generateCaptcha();
     } finally {
       setLoading(false);
     }
@@ -394,16 +436,51 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
             </div>
           )}
 
-          {/* Security Status Badge */}
-          <div className="flex items-center justify-between rounded-xl border border-[#27332D] bg-[#161F1B] px-3.5 py-2.5 text-xs text-slate-400">
-            <span className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-[#B7F34A]" />
-              <span className="font-mono text-[11px] text-slate-300">256-bit Encrypted Session</span>
-            </span>
-            <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#B7F34A]">
-              <span className="h-2 w-2 rounded-full bg-[#B7F34A] animate-pulse" />
-              Connected
-            </span>
+          {/* Security Captcha Challenge */}
+          <div className="space-y-1.5 pt-1">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <ShieldCheck size={14} className={captchaVerified ? "text-[#B7F34A]" : "text-[#25D9D0]"} />
+                <span>Security Verification</span>
+                {captchaVerified && (
+                  <span className="flex items-center gap-1 text-[11px] text-[#B7F34A] font-sans font-bold bg-[#B7F34A]/10 px-2 py-0.5 rounded-full border border-[#B7F34A]/30">
+                    <CheckCircle2 size={11} />
+                    Verified
+                  </span>
+                )}
+              </label>
+              <button
+                type="button"
+                onClick={generateCaptcha}
+                title="Get a new math challenge"
+                className="flex items-center gap-1 text-xs text-[#A4AEA8] hover:text-[#B7F34A] transition-colors cursor-pointer select-none"
+              >
+                <RotateCcw size={12} />
+                <span>Refresh</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 rounded-xl border border-[#27332D] bg-[#161F1B] px-4 py-3 text-center text-sm font-bold tracking-wider text-slate-100 font-mono select-none shadow-inner">
+                {captchaNum1} + {captchaNum2} = ?
+              </div>
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={userCaptcha}
+                  onChange={handleCaptchaChange}
+                  placeholder="Enter sum"
+                  className={`w-full rounded-xl border py-3 px-4 text-center text-sm text-slate-100 placeholder:text-slate-500 outline-none transition font-mono ${
+                    captchaVerified
+                      ? "border-[#B7F34A] bg-[#B7F34A]/5 text-[#B7F34A] shadow-[0_0_15px_rgba(183,243,74,0.15)]"
+                      : "border-[#27332D] bg-[#161F1B] focus:border-[#B7F34A]"
+                  }`}
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           {/* Submit Sign In Button */}
