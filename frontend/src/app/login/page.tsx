@@ -40,6 +40,8 @@ const storeSession = (token: string, user: any) => {
 const fetchAuth = async (endpoint: string, options: RequestInit) => {
   const hosts = [
     '', // Priority 1: Next.js rewrite proxy
+    process.env.NEXT_PUBLIC_API_URL || '',
+    'https://sporttalent-production.up.railway.app',
     typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '',
     'http://127.0.0.1:8000',
     'http://localhost:8000',

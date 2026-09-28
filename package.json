@@ -1,0 +1,9 @@
+{
+  "name": "sport-talent-prana",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "start": "npm --prefix frontend run start",
+    "vercel-build": "npm --prefix frontend run build"
+  }
+}

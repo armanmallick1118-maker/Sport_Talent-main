@@ -24,13 +24,22 @@ const allowedOrigins = [
   'http://127.0.0.1:3001',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  process.env.FRONTEND_URL,   // set this on Railway/Render in production
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    // allow requests with no origin (e.g. mobile apps, Postman, curl)
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    // allow requests with no origin (e.g. mobile apps, Postman, curl, server-side fetch)
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.includes('vercel.app') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1')
+    ) {
+      return callback(null, true);
+    }
     callback(new Error('CORS: origin not allowed — ' + origin));
   },
   credentials: true,

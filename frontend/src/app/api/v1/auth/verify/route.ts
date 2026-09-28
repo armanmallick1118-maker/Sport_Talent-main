@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Get backend URL
-    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const defaultBackend = process.env.NODE_ENV === 'production'
+      ? 'https://sporttalent-production.up.railway.app'
+      : 'http://localhost:8000';
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || defaultBackend;
 
     // Proxy request to real backend (backend handles GET/POST for verify)
     try {

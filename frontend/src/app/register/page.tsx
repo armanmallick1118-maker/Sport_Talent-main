@@ -26,11 +26,13 @@ const storeSession = (token: string, user: any) => {
 const fetchAuth = async (endpoint: string, options: RequestInit) => {
   const hosts = [
     '', // 1st priority: relative endpoint handled seamlessly by Next.js proxy rewrite
+    process.env.NEXT_PUBLIC_API_URL || '',
+    'https://sporttalent-production.up.railway.app',
     typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
   ];
-  const uniqueHosts = Array.from(new Set(hosts));
+  const uniqueHosts = Array.from(new Set(hosts.filter(Boolean)));
 
   let lastErr = null;
   for (const host of uniqueHosts) {

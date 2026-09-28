@@ -3,13 +3,18 @@
  * Connects to FastAPI backend at http://127.0.0.1:8000/api/v1 with seamless graceful fallbacks.
  */
 const isBrowser = typeof window !== 'undefined';
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || (isBrowser ? "/api/v1" : "http://127.0.0.1:8000/api/v1");
+const isProd = process.env.NODE_ENV === 'production';
+const defaultHost = isProd
+  ? 'https://sporttalent-production.up.railway.app/api/v1'
+  : 'http://127.0.0.1:8000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || (isBrowser ? "/api/v1" : defaultHost);
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const hosts = [
     API_BASE,
     isBrowser ? "/api/v1" : "",
+    "https://sporttalent-production.up.railway.app/api/v1",
     "http://127.0.0.1:8000/api/v1",
     "http://localhost:8000/api/v1",
   ].filter(Boolean);

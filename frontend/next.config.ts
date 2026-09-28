@@ -7,15 +7,18 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const isProd = process.env.NODE_ENV === "production";
-    const rules: { source: string; destination: string }[] = [];
-    if (process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL) {
-      const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || '';
-      const cleanHost = backendUrl.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
-      rules.push({
+    const defaultBackend = isProd
+      ? "https://sporttalent-production.up.railway.app"
+      : "http://127.0.0.1:8000";
+    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || defaultBackend;
+    const cleanHost = backendUrl.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
+
+    const rules: { source: string; destination: string }[] = [
+      {
         source: "/api/:path*",
         destination: `${cleanHost}/api/:path*`,
-      });
-    }
+      },
+    ];
 
     if (process.env.ML_MODEL_URL) {
       rules.push({
