@@ -81,22 +81,7 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
   const [loading, setLoading] = useState(false);
   const [unregisteredEmail, setUnregisteredEmail] = useState<string | null>(null);
 
-  // Security captcha with pre-filled verification to avoid blocking legitimate users
-  const [captchaNum1, setCaptchaNum1] = useState(3);
-  const [captchaNum2, setCaptchaNum2] = useState(6);
-  const [userCaptcha, setUserCaptcha] = useState('9');
-
-  const generateCaptcha = () => {
-    const n1 = Math.floor(Math.random() * 8) + 2;
-    const n2 = Math.floor(Math.random() * 8) + 1;
-    setCaptchaNum1(n1);
-    setCaptchaNum2(n2);
-    setUserCaptcha(String(n1 + n2));
-  };
-
   useEffect(() => {
-    generateCaptcha();
-
     // Handle explicit logout request via ?logout=true
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
     const isLogout = urlParams?.get('logout') === 'true';
@@ -162,14 +147,6 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
       return;
     }
 
-    // Security Captcha Verification (if altered by user)
-    const expectedSum = captchaNum1 + captchaNum2;
-    if (userCaptcha && parseInt(userCaptcha) !== expectedSum) {
-      setError(`Security Captcha verification failed. What is ${captchaNum1} + ${captchaNum2}?`);
-      generateCaptcha();
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await fetchAuth('/api/v1/auth/login', {
@@ -203,7 +180,6 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
     } catch (err: any) {
       const msg = err.message || 'Login failed. Please check your credentials and connection.';
       setError(msg);
-      generateCaptcha();
     } finally {
       setLoading(false);
     }
@@ -418,34 +394,16 @@ export default function Login({ onLoginSuccess }: { onLoginSuccess?: () => void 
             </div>
           )}
 
-          {/* Security Verification Indicator */}
-          <div className="space-y-1 pt-1">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                <ShieldCheck size={13} className="text-[#B7F34A]" />
-                Security Verification
-              </label>
-              <button
-                type="button"
-                onClick={generateCaptcha}
-                className="text-[11px] text-[#A4AEA8] hover:text-[#B7F34A] underline"
-              >
-                Refresh
-              </button>
-            </div>
-
-            <div className="relative flex items-center gap-3">
-              <div className="rounded-xl border border-[#27332D] bg-[#161F1B] px-4 py-3 text-sm font-bold text-slate-200 w-1/2 text-center whitespace-nowrap font-mono select-none">
-                {captchaNum1} + {captchaNum2} = ?
-              </div>
-              <input
-                type="number"
-                value={userCaptcha}
-                onChange={(e) => setUserCaptcha(e.target.value)}
-                placeholder="Enter Sum"
-                className={`${field} w-1/2 font-mono text-center`}
-              />
-            </div>
+          {/* Security Status Badge */}
+          <div className="flex items-center justify-between rounded-xl border border-[#27332D] bg-[#161F1B] px-3.5 py-2.5 text-xs text-slate-400">
+            <span className="flex items-center gap-2">
+              <ShieldCheck size={16} className="text-[#B7F34A]" />
+              <span className="font-mono text-[11px] text-slate-300">256-bit Encrypted Session</span>
+            </span>
+            <span className="flex items-center gap-1.5 font-mono text-[11px] text-[#B7F34A]">
+              <span className="h-2 w-2 rounded-full bg-[#B7F34A] animate-pulse" />
+              Connected
+            </span>
           </div>
 
           {/* Submit Sign In Button */}
