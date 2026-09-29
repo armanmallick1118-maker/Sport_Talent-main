@@ -1,9 +1,9 @@
 /**
  * API client and data fetching utilities for ATHENA Web.
- * Connects to FastAPI backend at http://127.0.0.1:8000/api/v1 with seamless graceful fallbacks.
+ * Connects to FastAPI backend at Railway with seamless graceful fallbacks.
  */
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1";
-export const CV_API_BASE = process.env.NEXT_PUBLIC_CV_API_URL || "http://127.0.0.1:8002";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://sporttalent-production.up.railway.app/api/v1";
+export const CV_API_BASE = process.env.NEXT_PUBLIC_CV_API_URL || "https://sporttalent-production.up.railway.app";
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
