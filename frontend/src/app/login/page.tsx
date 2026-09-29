@@ -93,8 +93,14 @@ export default function Login() {
       router.push('/');
     } catch (err: any) {
       // Fallback for local preview without backend
-      if (err.message.includes('Failed to fetch') || err.message.includes('fetch failed')) {
-        console.warn("Backend not reachable. Falling back to mock authentication for preview.");
+      const isNetworkOrParseError = 
+        err.message.includes('Failed to fetch') || 
+        err.message.includes('fetch failed') || 
+        err.message.includes('is not valid JSON') || 
+        err.message.includes('Unexpected token');
+
+      if (isNetworkOrParseError) {
+        console.warn("Backend not reachable or returned HTML. Falling back to mock authentication for preview.");
         const mockUser = {
           id: 'mock-123',
           email: formData.email,
