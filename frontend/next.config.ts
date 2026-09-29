@@ -7,11 +7,7 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const isProd = process.env.NODE_ENV === "production";
-    const defaultBackend = isProd
-      ? "https://sporttalent-production.up.railway.app"
-      : "http://127.0.0.1:8000";
-    const backendUrl = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || defaultBackend;
-    const cleanHost = backendUrl.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
+    const cleanHost = "https://sporttalent-production.up.railway.app";
 
     const rules: { source: string; destination: string }[] = [
       {

@@ -2,8 +2,8 @@
  * API client and data fetching utilities for ATHENA Web.
  * Connects to FastAPI backend at Railway with seamless graceful fallbacks.
  */
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://sporttalent-production.up.railway.app/api/v1";
-export const CV_API_BASE = process.env.NEXT_PUBLIC_CV_API_URL || "https://sporttalent-production.up.railway.app";
+export const API_BASE = "/api/v1";
+export const CV_API_BASE = "/cv";
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
