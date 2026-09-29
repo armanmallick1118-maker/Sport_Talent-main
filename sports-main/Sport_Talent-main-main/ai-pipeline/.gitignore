@@ -1,0 +1,58 @@
+# ============================================================
+# MediaPipeline — .gitignore
+# ============================================================
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment variables (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Storage directories (large files)
+storage/uploads/
+storage/frames/
+storage/results/
+storage/visualizations/
+storage/logs/
+
+# YOLO model weights (downloaded on first run)
+*.pt
+*.onnx
+
+# MediaPipe model cache
+~/.mediapipe/
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Logs
+*.log
