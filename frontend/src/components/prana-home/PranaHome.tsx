@@ -20,10 +20,20 @@ import {
   Activity,
   Award,
   LogOut,
+  LogIn,
 } from "lucide-react";
 
 export const PranaHome: React.FC = () => {
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  React.useEffect(() => {
+    try {
+      const token = localStorage.getItem("token");
+      const logged = localStorage.getItem("isLoggedIn") === "true";
+      setIsLoggedIn(Boolean(token || logged));
+    } catch {}
+  }, []);
 
   const handleLogout = () => {
     try {
@@ -33,8 +43,9 @@ export const PranaHome: React.FC = () => {
       localStorage.removeItem("userId");
       localStorage.removeItem("userEmail");
       localStorage.removeItem("user");
+      document.cookie = "token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     } catch {}
-    window.location.replace("/login");
+    setIsLoggedIn(false);
   };
 
   const scrollToOrbit = () => {
@@ -84,14 +95,25 @@ export const PranaHome: React.FC = () => {
             <span className="hidden sm:inline">Theme</span>
           </button>
 
-          <button
-            onClick={handleLogout}
-            className="px-3 py-1.5 rounded-xl border border-red-500/40 bg-red-500/15 text-red-400 hover:bg-red-500/25 hover:text-red-300 hover:border-red-500/60 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm cursor-pointer"
-            title="Log Out of PRANA"
-          >
-            <LogOut className="w-3.5 h-3.5 text-red-400" />
-            <span>Log Out</span>
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1.5 rounded-xl border border-red-500/40 bg-red-500/15 text-red-400 hover:bg-red-500/25 hover:text-red-300 hover:border-red-500/60 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm cursor-pointer"
+              title="Log Out of PRANA"
+            >
+              <LogOut className="w-3.5 h-3.5 text-red-400" />
+              <span>Log Out</span>
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className="px-3 py-1.5 rounded-xl border border-[#B7F34A]/40 bg-[#B7F34A]/10 text-[#B7F34A] hover:bg-[#B7F34A]/20 hover:text-white transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm cursor-pointer"
+              title="Sign into PRANA"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </Link>
+          )}
 
           <Link
             href="/dashboard"
@@ -373,14 +395,25 @@ export const PranaHome: React.FC = () => {
             <Link href="/dashboard?view=profile" className="hover:text-white transition-colors">
               Profile
             </Link>
-            <button
-              onClick={handleLogout}
-              className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 cursor-pointer"
-              title="Sign out of PRANA"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Log Out</span>
-            </button>
+            {isLoggedIn ? (
+              <button
+                onClick={handleLogout}
+                className="text-red-400 hover:text-red-300 transition-colors flex items-center gap-1 cursor-pointer"
+                title="Sign out of PRANA"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Log Out</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="text-[#B7F34A] hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
+                title="Sign In to PRANA"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
         </div>
       </footer>

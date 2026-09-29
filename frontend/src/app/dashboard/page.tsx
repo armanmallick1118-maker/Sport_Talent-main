@@ -18,7 +18,7 @@ import { SpecializedHubView } from "@/components/SpecializedHubView";
 import { ProfileView } from "@/components/ProfileView";
 import { GeospatialRadarView } from "@/components/GeospatialRadarView";
 import { ThemeCustomizerModal } from "@/components/ThemeEngine";
-import { Menu, X, LogOut, Palette, ChevronRight } from "lucide-react";
+import { Menu, X, LogOut, LogIn, Palette, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -26,20 +26,30 @@ export default function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState<boolean>(false);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    // Strict Authentication Guard
+    // Non-blocking Authentication Check
     const checkAuth = () => {
-      const token = localStorage.getItem("token");
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      if (!token && isLoggedIn !== "true") {
-        window.location.replace("/login");
-        return false;
+      try {
+        const token = localStorage.getItem("token");
+        const isLoggedIn = localStorage.getItem("isLoggedIn");
+        const authenticated = Boolean(token || isLoggedIn === "true");
+        setIsUserAuthenticated(authenticated);
+
+        // If not authenticated, ensure friendly guest defaults so profile & metrics don't error
+        if (!authenticated) {
+          if (!localStorage.getItem("userName")) {
+            localStorage.setItem("userName", "Athlete");
+          }
+        }
+      } catch {
+        setIsUserAuthenticated(false);
       }
       return true;
     };
 
-    if (!checkAuth()) return;
+    checkAuth();
 
     // Handle bfcache / back-forward navigation after logout
     const handlePageShow = (e: PageTransitionEvent) => {
@@ -91,9 +101,10 @@ export default function DashboardPage() {
       localStorage.removeItem("userId");
       localStorage.removeItem("userEmail");
       localStorage.removeItem("user");
+      document.cookie = "token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     } catch {}
-    // Use replace so current page is removed from history stack, preventing Back button return
-    window.location.replace("/login");
+    setIsUserAuthenticated(false);
+    window.location.replace("/");
   };
 
   // Live state synchronized from FastAPI backend (with immediate mock fallback)
@@ -320,14 +331,25 @@ export default function DashboardPage() {
               <span className="hidden sm:inline">Theme</span>
             </button>
 
-            <button
-              onClick={handleLogout}
-              className="px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm"
-              title="Log Out of PRANA"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Log Out</span>
-            </button>
+            {isUserAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 hover:border-red-500/50 transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm cursor-pointer"
+                title="Log Out of PRANA"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Log Out</span>
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="px-3 py-1.5 rounded-lg border border-[#B7F34A]/40 bg-[#B7F34A]/10 text-[#B7F34A] hover:bg-[#B7F34A]/20 hover:text-white transition-all flex items-center gap-1.5 text-xs font-semibold shadow-sm cursor-pointer"
+                title="Sign in to save personal biometrics to the cloud"
+              >
+                <LogIn className="w-3.5 h-3.5" />
+                <span>Sign In</span>
+              </Link>
+            )}
           </div>
         </header>
 

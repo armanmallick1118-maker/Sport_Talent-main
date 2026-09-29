@@ -11,12 +11,15 @@ const field =
   'w-full rounded-xl border border-[#27332D] bg-[#161F1B] py-3 pl-11 pr-11 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-[#B7F34A]';
 
 const storeSession = (token: string, user: any) => {
-  localStorage.setItem('token', token);
-  localStorage.setItem('role', user.role);
-  localStorage.setItem('isLoggedIn', 'true');
-  localStorage.setItem('userId', user.id);
-  localStorage.setItem('userEmail', user.email);
-  localStorage.setItem('user', JSON.stringify(user));
+  try {
+    localStorage.setItem('token', token);
+    localStorage.setItem('role', user?.role || 'athlete');
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userId', user?.id || '');
+    localStorage.setItem('userEmail', user?.email || '');
+    localStorage.setItem('user', JSON.stringify(user));
+    document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
+  } catch {}
 };
 
 export default function Login() {
@@ -90,7 +93,7 @@ export default function Login() {
       const { token, user } = data;
       
       storeSession(token, user);
-      router.push('/');
+      router.push('/dashboard');
     } catch (err: any) {
       const isNetworkOrParseError = 
         err.message.includes('Failed to fetch') || 
@@ -338,6 +341,16 @@ export default function Login() {
           </svg>
           Continue with Google
         </button>
+
+        <div className="mt-5 pt-4 border-t border-[#27332D] text-center">
+          <Link
+            href="/dashboard"
+            className="text-xs text-slate-400 hover:text-[#B7F34A] transition-colors font-mono inline-flex items-center gap-1.5"
+          >
+            <span>Explore PRANA Dashboard as Guest</span>
+            <span aria-hidden>&rarr;</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

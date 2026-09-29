@@ -18,6 +18,7 @@ const storeSession = (token: string, user: any) => {
     localStorage.setItem('userId', user?.id || '');
     localStorage.setItem('userEmail', user?.email || '');
     localStorage.setItem('user', JSON.stringify(user || {}));
+    document.cookie = `token=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`;
   } catch (err) {
     console.error('Failed to store session:', err);
   }
@@ -141,8 +142,8 @@ export default function Register() {
         if (loginRes.ok) {
           const loginData = await loginRes.json();
           storeSession(loginData.token, { ...loginData.user, fullName: cleanName });
-          // Directly navigate to the profile section for the new user
-          router.push('/?view=profile');
+          // Directly navigate to the profile section in dashboard for the new user
+          router.push('/dashboard?view=profile');
           return;
         }
       } catch (loginErr) {
@@ -347,6 +348,16 @@ export default function Register() {
           </svg>
           Continue with Google
         </button>
+
+        <div className="mt-5 pt-4 border-t border-[#27332D] text-center">
+          <Link
+            href="/dashboard"
+            className="text-xs text-slate-400 hover:text-[#B7F34A] transition-colors font-mono inline-flex items-center gap-1.5"
+          >
+            <span>Explore PRANA Dashboard as Guest</span>
+            <span aria-hidden>&rarr;</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
