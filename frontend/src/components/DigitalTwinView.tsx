@@ -64,16 +64,16 @@ export const DigitalTwinView: React.FC<DigitalTwinProps> = ({
   return (
     <div className="space-y-6">
       {/* Header & Versioning Control */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border)] pb-5">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase flex items-center gap-1.5">
+          <div className="section-label flex items-center gap-1.5">
             <Cpu className="w-3.5 h-3.5" />
             Continuously Evolving User State
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-0.5">
+          <h1 className="page-title mt-0.5">
             Personal Digital Fitness Twin
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Immutable versioned representation across Physical, Recovery, Nutrition, Mental, Performance, and Goals.
           </p>
         </div>

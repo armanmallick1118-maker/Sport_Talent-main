@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { API_BASE } from "@/lib/api";
 import { Sidebar, ViewType } from "@/components/Sidebar";
 import { DashboardView } from "@/components/DashboardView";
 import { DigitalTwinView } from "@/components/DigitalTwinView";
@@ -27,50 +28,27 @@ export default function DashboardPage() {
   const [isThemeModalOpen, setIsThemeModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    // Strict Server-Verified Authentication Guard
-    const checkAuth = async () => {
+    // Strict Authentication Guard
+    const checkAuth = () => {
       const token = localStorage.getItem("token");
-      if (!token || typeof token !== "string" || token.length < 20) {
-        try {
-          localStorage.clear();
-          sessionStorage.clear();
-        } catch {}
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (!token && isLoggedIn !== "true") {
         window.location.replace("/login");
         return false;
       }
-
-      try {
-        const res = await fetch("/api/v1/auth/verify", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) {
-          try {
-            localStorage.clear();
-            sessionStorage.clear();
-          } catch {}
-          window.location.replace("/login");
-          return false;
-        }
-      } catch {}
       return true;
     };
 
-    checkAuth();
+    if (!checkAuth()) return;
 
-    // Prevent browser Back button ("undo") / bfcache from restoring authenticated views after logout
-    const handlePageShow = () => {
-      checkAuth();
-    };
-
-    const handlePopState = () => {
-      checkAuth();
+    // Handle bfcache / back-forward navigation after logout
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        checkAuth();
+      }
     };
 
     window.addEventListener("pageshow", handlePageShow);
-    window.addEventListener("popstate", handlePopState);
 
     try {
       const saved = localStorage.getItem("prana_sidebar_collapsed") || localStorage.getItem("athena_sidebar_collapsed");
@@ -107,15 +85,15 @@ export default function DashboardPage() {
 
   const handleLogout = () => {
     try {
-      localStorage.clear();
-      sessionStorage.clear();
-      document.cookie = "token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-      fetch('/api/v1/auth/logout', { method: 'POST' }).catch(() => {});
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("user");
     } catch {}
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new Event("prana_auth_change"));
-      window.location.replace("/login");
-    }
+    // Use replace so current page is removed from history stack, preventing Back button return
+    window.location.replace("/login");
   };
 
   // Live state synchronized from FastAPI backend (with immediate mock fallback)
@@ -153,20 +131,20 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadBackendData() {
       try {
-        const twinRes = await fetch("/api/v1/twin").catch(() => fetch("http://127.0.0.1:8000/api/v1/twin"));
-        if (twinRes && twinRes.ok) setTwinData(await twinRes.json());
+        const twinRes = await fetch(`${API_BASE}/twin`);
+        if (twinRes.ok) setTwinData(await twinRes.json());
       } catch (e) {
         // Fallback already pre-set
       }
 
       try {
-        const recRes = await fetch("/api/v1/coach/recommendation").catch(() => fetch("http://127.0.0.1:8000/api/v1/coach/recommendation"));
-        if (recRes && recRes.ok) setRecommendation(await recRes.json());
+        const recRes = await fetch(`${API_BASE}/coach/recommendation`);
+        if (recRes.ok) setRecommendation(await recRes.json());
       } catch (e) {}
 
       try {
-        const readRes = await fetch("/api/v1/recovery/readiness").catch(() => fetch("http://127.0.0.1:8000/api/v1/recovery/readiness"));
-        if (readRes && readRes.ok) setReadinessData(await readRes.json());
+        const readRes = await fetch(`${API_BASE}/recovery/readiness`);
+        if (readRes.ok) setReadinessData(await readRes.json());
       } catch (e) {}
     }
     loadBackendData();

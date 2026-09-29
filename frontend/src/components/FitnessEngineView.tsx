@@ -22,7 +22,9 @@ import {
   Zap,
   Award,
   ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 
 export interface LoggedWorkout {
   id: string | number;
@@ -311,17 +313,17 @@ export const FitnessEngineView: React.FC<FitnessProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase flex items-center gap-1.5 font-mono">
-            <Activity className="w-3.5 h-3.5" />
-            Biomechanical Assessment &bull; Training Session Hub
+          <div className="section-label flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5 text-[var(--primary)]" />
+            Fitness Assessment & Training
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Dynamic Fitness Engine
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time physical parameter calibration, session activity logging, and reactive Digital Twin synchronization.
+          <p className="text-sm text-[var(--muted)] mt-1">
+            Calibrate your physical parameters and log training sessions.
           </p>
         </div>
 
@@ -408,7 +410,15 @@ export const FitnessEngineView: React.FC<FitnessProps> = ({
             </div>
           </div>
 
-          {/* 4 Quadrant Sliders Grid */}
+          {/* 4 Quadrant Sliders Grid — Collapsed by default */}
+          <CollapsibleSection
+            title="Adjust Physical Parameters"
+            subtitle="Fine-tune your assessment inputs to recalibrate your Digital Twin"
+            icon={<Sliders className="w-4 h-4" />}
+            badge={`${Object.values(scores).reduce((a, b) => a + b, 0) / Object.values(scores).length | 0} avg`}
+            badgeColor="cyan"
+            defaultOpen={false}
+          >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Strength */}
             <div className="athena-card p-5 space-y-4 border-slate-800 bg-slate-950">
@@ -587,6 +597,7 @@ export const FitnessEngineView: React.FC<FitnessProps> = ({
               </div>
             </div>
           </div>
+          </CollapsibleSection>
         </div>
       )}
 

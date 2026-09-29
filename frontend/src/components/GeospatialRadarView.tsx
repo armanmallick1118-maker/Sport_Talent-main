@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { API_BASE } from "../lib/api";
 import {
   Compass,
   MapPin,
@@ -536,9 +537,8 @@ export const GeospatialRadarView: React.FC = () => {
 
   // Sync with backend geospatial plugin if live
   useEffect(() => {
-    fetch("/api/v1/plugins/geospatial/heatmap")
-      .catch(() => fetch("http://127.0.0.1:8000/api/v1/plugins/geospatial/heatmap"))
-      .then((res) => (res ? res.json() : null))
+    fetch(`${API_BASE}/plugins/geospatial/heatmap`)
+      .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
           setBackendHubsCount(data.length);
@@ -652,13 +652,13 @@ export const GeospatialRadarView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
           <div className="text-xs font-semibold tracking-wider text-cyan-400 uppercase flex items-center gap-1.5 font-mono">
             <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
             Sports Infrastructure &bull; Geospatial Fitness Radar
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1 flex items-center gap-2">
+          <h1 className="page-title mt-1 flex items-center gap-2">
             Sports &amp; Athletic Facilities Radar
             <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
               {filteredFacilities.length} Venues Active
@@ -670,7 +670,7 @@ export const GeospatialRadarView: React.FC = () => {
               </span>
             )}
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Real-time geospatial radar tracking gyms, stadiums, athletic grounds, Olympic swimming pools, badminton courts, combat dojos, and sports science centers.
           </p>
         </div>

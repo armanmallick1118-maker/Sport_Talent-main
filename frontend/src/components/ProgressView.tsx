@@ -187,16 +187,16 @@ export const ProgressView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase flex items-center gap-1.5 font-mono">
+          <div className="section-label flex items-center gap-1.5">
             <TrendingUp className="w-3.5 h-3.5" />
             Longitudinal Physiological Progression
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Progress &amp; Trend Intelligence
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Multi-horizon trajectory tracking across physical fitness, cardiovascular output, kinetic strength, and body composition.
           </p>
         </div>

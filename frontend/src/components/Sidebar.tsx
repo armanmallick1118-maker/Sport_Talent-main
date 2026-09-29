@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -12,14 +12,14 @@ import {
   Brain,
   TrendingUp,
   Target,
-  Sparkles,
-  Camera,
   Layers,
   User,
   ShieldCheck,
   FileText,
   Compass,
   ChevronLeft,
+  ChevronDown,
+  Camera,
 } from "lucide-react";
 
 export type ViewType =
@@ -38,6 +38,18 @@ export type ViewType =
   | "specialized"
   | "profile";
 
+interface NavItem {
+  id: ViewType;
+  label: string;
+  icon: React.ElementType;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+  defaultOpen?: boolean;
+}
+
 interface SidebarProps {
   currentView: ViewType;
   onSelectView: (view: ViewType) => void;
@@ -46,6 +58,106 @@ interface SidebarProps {
   onToggleCollapse?: () => void;
 }
 
+const navGroups: NavGroup[] = [
+  {
+    label: "Overview",
+    defaultOpen: true,
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "twin", label: "My Twin", icon: Cpu },
+    ],
+  },
+  {
+    label: "Training & Fitness",
+    defaultOpen: true,
+    items: [
+      { id: "fitness", label: "Fitness Engine", icon: Activity },
+      { id: "cv", label: "Exercise CV Coach", icon: Camera },
+      { id: "goals", label: "Goals Engine", icon: Target },
+    ],
+  },
+  {
+    label: "Health & Wellness",
+    defaultOpen: true,
+    items: [
+      { id: "nutrition", label: "Nutrition & Calorie", icon: Utensils },
+      { id: "recovery", label: "Recovery & Sleep", icon: Moon },
+      { id: "mental", label: "Mental Wellness", icon: Brain },
+      { id: "health", label: "Health & Lab Reports", icon: FileText },
+      { id: "specialized", label: "Specialized Hub", icon: Layers },
+    ],
+  },
+  {
+    label: "Tools",
+    defaultOpen: false,
+    items: [
+      { id: "coach", label: "Coach Jack (AI)", icon: Bot },
+      { id: "georadar", label: "Sports & Fitness Radar", icon: Compass },
+      { id: "progress", label: "Longitudinal Progress", icon: TrendingUp },
+      { id: "profile", label: "Profile & Privacy", icon: User },
+    ],
+  },
+];
+
+const NavGroupComponent: React.FC<{
+  group: NavGroup;
+  currentView: ViewType;
+  onSelectView: (view: ViewType) => void;
+}> = ({ group, currentView, onSelectView }) => {
+  // Auto-open group if current view is within it
+  const hasActiveItem = group.items.some((item) => item.id === currentView);
+  const [isOpen, setIsOpen] = useState(group.defaultOpen || hasActiveItem);
+
+  return (
+    <div className="mb-1">
+      {/* Group Header */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-[var(--muted)] hover:text-[var(--secondary)] transition-colors"
+      >
+        <span>{group.label}</span>
+        <ChevronDown
+          className={`w-3 h-3 transition-transform duration-200 ${
+            isOpen ? "rotate-0" : "-rotate-90"
+          }`}
+        />
+      </button>
+
+      {/* Group Items */}
+      <div
+        className={`transition-all duration-200 ease-in-out overflow-hidden ${
+          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="space-y-0.5 pb-2">
+          {group.items.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onSelectView(item.id)}
+                className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-lg transition-all ${
+                  isActive
+                    ? "bg-[var(--surface-elevated)] text-[var(--foreground)] border-l-2 border-[var(--primary)] font-semibold shadow-sm"
+                    : "text-[var(--secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]/50 border-l-2 border-transparent"
+                }`}
+              >
+                <Icon
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    isActive ? "text-[var(--primary)]" : "text-[var(--muted)]"
+                  }`}
+                />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const Sidebar: React.FC<SidebarProps> = ({
   currentView,
   onSelectView,
@@ -53,39 +165,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   readinessScore = 74,
   onToggleCollapse,
 }) => {
-  const [profileCompletion, setProfileCompletion] = React.useState<number>(100);
-
-  React.useEffect(() => {
-    const updateCompletion = () => {
-      try {
-        const saved = localStorage.getItem("athena_profile_completion");
-        if (saved !== null) {
-          setProfileCompletion(parseInt(saved));
-        }
-      } catch {}
-    };
-    updateCompletion();
-    window.addEventListener("athena_profile_updated", updateCompletion);
-    return () => window.removeEventListener("athena_profile_updated", updateCompletion);
-  }, []);
-
-  const navItems: { id: ViewType; label: string; icon: React.ElementType }[] = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "twin", label: "My Twin", icon: Cpu },
-    { id: "fitness", label: "Fitness Engine", icon: Activity },
-    { id: "coach", label: "Coach Jack", icon: Bot },
-    { id: "health", label: "Health & Lab Reports", icon: FileText },
-    { id: "cv", label: "Exercise CV Coach", icon: Camera },
-    { id: "georadar", label: "Sports & Fitness Radar", icon: Compass },
-    { id: "nutrition", label: "Nutrition & Calorie", icon: Utensils },
-    { id: "recovery", label: "Recovery & Sleep", icon: Moon },
-    { id: "mental", label: "Mental Wellness", icon: Brain },
-    { id: "progress", label: "Longitudinal Progress", icon: TrendingUp },
-    { id: "goals", label: "Goals Engine", icon: Target },
-    { id: "specialized", label: "Specialized Hub", icon: Layers },
-    { id: "profile", label: "Profile & Privacy", icon: User },
-  ];
-
   return (
     <div className="w-64 h-full border-r border-[var(--border)] bg-[var(--surface)] flex flex-col select-none">
       {/* Brand Header */}
@@ -124,32 +203,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
-      {/* Navigation List */}
-      <nav className="flex-1 overflow-y-auto py-2.5 px-2.5 space-y-1">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = currentView === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSelectView(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2 text-xs font-medium rounded-lg transition-all ${
-                isActive
-                  ? "bg-[var(--surface-elevated)] text-[var(--foreground)] border-l-2 border-[var(--primary)] font-semibold shadow-sm"
-                  : "text-[var(--secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)]/50 border-l-2 border-transparent"
-              }`}
-            >
-              <div className="flex items-center gap-2.5 truncate">
-                <Icon
-                  className={`w-3.5 h-3.5 shrink-0 ${
-                    isActive ? "text-[var(--primary)]" : "text-[var(--muted)]"
-                  }`}
-                />
-                <span className="truncate">{item.label}</span>
-              </div>
-            </button>
-          );
-        })}
+      {/* Navigation Groups */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2.5">
+        {navGroups.map((group) => (
+          <NavGroupComponent
+            key={group.label}
+            group={group}
+            currentView={currentView}
+            onSelectView={onSelectView}
+          />
+        ))}
       </nav>
 
       {/* Platform & Safety Tag */}

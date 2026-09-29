@@ -27,7 +27,9 @@ import {
   PhoneCall,
   LifeBuoy,
   ShieldAlert,
+  List,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 
 interface MoodExercise {
   id: string;
@@ -305,16 +307,16 @@ export const MentalWellnessView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
           <div className="text-xs font-semibold tracking-wider text-purple-400 uppercase flex items-center gap-1.5 font-mono">
             <Brain className="w-3.5 h-3.5" />
             Neurochemical Telemetry &bull; Somatic Balance Engine
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Mental Wellness &amp; Mood Engine
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Real-time psychological scoring, emotional state verdict (Happy, Sad, Stressed, Thriving), and adaptive mood-boosting exercises.
           </p>
         </div>
@@ -601,7 +603,7 @@ export const MentalWellnessView: React.FC = () => {
                 <h4 className="text-base font-bold text-white tracking-tight">
                   {selectedExercise.title}
                 </h4>
-                <div className="flex items-center gap-3 text-xs text-slate-400 mt-1 font-mono">
+                <div className="flex items-center gap-3 text-sm text-[var(--muted)] mt-1 font-mono">
                   <span>⏱️ {selectedExercise.durationMins} Minutes</span>
                   <span>⚡ Intensity: {selectedExercise.intensity}</span>
                 </div>
@@ -669,31 +671,35 @@ export const MentalWellnessView: React.FC = () => {
 
           {/* Quick List of Other Mood Exercises */}
           <div className="pt-2 border-t border-slate-800">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase font-mono mb-2">
-              Browse All Mental Health Exercises:
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {MENTAL_HEALTH_EXERCISES.map((ex) => (
-                <button
-                  key={ex.id}
-                  onClick={() => {
-                    setSelectedExercise(ex);
-                    setExerciseTimer(ex.durationMins * 60);
-                    setTimerActive(false);
-                  }}
-                  className={`p-2 rounded-lg text-left text-xs transition-all border ${
-                    selectedExercise.id === ex.id
-                      ? "bg-purple-950/60 border-purple-500/60 text-white font-semibold"
-                      : "bg-slate-900/50 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-                  }`}
-                >
-                  <div className="truncate">{ex.title}</div>
-                  <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                    {ex.durationMins}m &bull; {ex.category}
-                  </div>
-                </button>
-              ))}
-            </div>
+            <CollapsibleSection
+              title="Browse All Mental Health Exercises"
+              subtitle="View more exercises for different emotional states"
+              icon={<List className="w-4 h-4" />}
+              defaultOpen={false}
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                {MENTAL_HEALTH_EXERCISES.map((ex) => (
+                  <button
+                    key={ex.id}
+                    onClick={() => {
+                      setSelectedExercise(ex);
+                      setExerciseTimer(ex.durationMins * 60);
+                      setTimerActive(false);
+                    }}
+                    className={`p-2 rounded-lg text-left text-xs transition-all border ${
+                      selectedExercise.id === ex.id
+                        ? "bg-purple-950/60 border-purple-500/60 text-white font-semibold"
+                        : "bg-slate-900/50 border-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                    }`}
+                  >
+                    <div className="truncate">{ex.title}</div>
+                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                      {ex.durationMins}m &bull; {ex.category}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CollapsibleSection>
           </div>
         </div>
       </div>
