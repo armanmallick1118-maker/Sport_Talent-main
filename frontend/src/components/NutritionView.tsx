@@ -598,7 +598,7 @@ export const NutritionView: React.FC = () => {
               subtitle="Track daily water and view calculation guidelines"
               icon={<Droplets className="w-4 h-4" />}
               badge={`${waterMl}ml / ${waterTarget}ml`}
-              badgeColor="blue"
+              badgeColor="cyan"
               defaultOpen={false}
             >
               <div className="space-y-4 mt-4">
