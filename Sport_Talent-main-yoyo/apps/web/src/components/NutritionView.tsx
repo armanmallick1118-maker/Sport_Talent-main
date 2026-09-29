@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { API_BASE } from "../lib/api";
 import {
   Utensils,
   Droplets,
@@ -265,8 +266,7 @@ export const NutritionView: React.FC = () => {
 
     try {
       const endpoints = [
-        "http://localhost:8000/api/v1/nutrition/parse",
-        "http://127.0.0.1:8000/api/v1/nutrition/parse",
+        `${API_BASE}/nutrition/parse`,
       ];
       let successData = null;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { API_BASE } from "../lib/api";
 import {
   Send,
   Sparkles,
@@ -687,7 +688,7 @@ export const AICoachView: React.FC<AICoachProps> = ({
       const telemetry = gatherAllAppData();
       const token = typeof window !== "undefined" ? localStorage.getItem("athena_token") : null;
 
-      const res = await fetch("http://127.0.0.1:8000/api/v1/ai-suggestions/chat", {
+      const res = await fetch(`${API_BASE}/ai-suggestions/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

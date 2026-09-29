@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Eye, EyeOff, Lock, Mail, User, Loader2, ArrowRight } from 'lucide-react';
 import BrandMark from '../../components/BrandMark';
+import { API_BASE } from '../../lib/api';
 
 const field =
   'w-full rounded-xl border border-[#27332D] bg-[#161F1B] py-3 pl-11 pr-11 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-[#B7F34A]';
@@ -81,7 +82,7 @@ export default function Register() {
       const cleanName = formData.fullName.trim();
 
       // 1. Call registration endpoint
-      const regRes = await fetch('http://127.0.0.1:8000/api/v1/auth/register', {
+      const regRes = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,7 +129,7 @@ export default function Register() {
 
       // 2. Auto-login the newly created user
       try {
-        const loginRes = await fetch('http://127.0.0.1:8000/api/v1/auth/login', {
+        const loginRes = await fetch(`${API_BASE}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

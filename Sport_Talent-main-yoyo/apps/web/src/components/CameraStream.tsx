@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-
+import { CV_API_BASE } from "../lib/api";
 export default function CameraStream() {
   return (
     <div className="w-full max-w-4xl mx-auto rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-black/40 backdrop-blur-md">
@@ -13,7 +13,7 @@ export default function CameraStream() {
       </div>
       <div className="relative aspect-video bg-black flex items-center justify-center">
         <img 
-          src="http://127.0.0.1:8002/video_feed" 
+          src={`${CV_API_BASE}/video_feed`} 
           alt="OpenCV Camera Stream" 
           className="w-full h-full object-cover"
           onError={(e) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { API_BASE } from "@/lib/api";
 import { Sidebar, ViewType } from "@/components/Sidebar";
 import { DashboardView } from "@/components/DashboardView";
 import { DigitalTwinView } from "@/components/DigitalTwinView";
@@ -130,19 +131,19 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadBackendData() {
       try {
-        const twinRes = await fetch("http://127.0.0.1:8000/api/v1/twin");
+        const twinRes = await fetch(`${API_BASE}/twin`);
         if (twinRes.ok) setTwinData(await twinRes.json());
       } catch (e) {
         // Fallback already pre-set
       }
 
       try {
-        const recRes = await fetch("http://127.0.0.1:8000/api/v1/coach/recommendation");
+        const recRes = await fetch(`${API_BASE}/coach/recommendation`);
         if (recRes.ok) setRecommendation(await recRes.json());
       } catch (e) {}
 
       try {
-        const readRes = await fetch("http://127.0.0.1:8000/api/v1/recovery/readiness");
+        const readRes = await fetch(`${API_BASE}/recovery/readiness`);
         if (readRes.ok) setReadinessData(await readRes.json());
       } catch (e) {}
     }

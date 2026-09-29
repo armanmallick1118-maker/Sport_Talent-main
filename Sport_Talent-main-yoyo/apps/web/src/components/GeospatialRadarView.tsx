@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { API_BASE } from "../lib/api";
 import {
   Compass,
   MapPin,
@@ -536,7 +537,7 @@ export const GeospatialRadarView: React.FC = () => {
 
   // Sync with backend geospatial plugin if live
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/v1/plugins/geospatial/heatmap")
+    fetch(`${API_BASE}/plugins/geospatial/heatmap`)
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {

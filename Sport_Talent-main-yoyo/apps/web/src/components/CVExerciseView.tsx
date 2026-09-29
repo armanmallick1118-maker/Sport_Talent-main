@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { CV_API_BASE } from "../lib/api";
 import {
   Camera,
   Play,
@@ -103,7 +104,7 @@ export const CVExerciseView: React.FC = () => {
     let isMounted = true;
     const checkBackend = async () => {
       try {
-        const res = await fetch("http://127.0.0.1:8002/health", { cache: "no-store" });
+        const res = await fetch(`${CV_API_BASE}/health`, { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (data.status === "ok" && isMounted) setIsBackendConnected(true);
@@ -252,7 +253,7 @@ export const CVExerciseView: React.FC = () => {
         formData.append("exercise", exercise);
 
         setAnalysisProgress(50);
-        const res = await fetch("http://127.0.0.1:8002/analyze_video_upload", {
+        const res = await fetch(`${CV_API_BASE}/analyze_video_upload`, {
           method: "POST",
           body: formData,
         });
@@ -346,7 +347,7 @@ export const CVExerciseView: React.FC = () => {
 
     // Optional background notification to port 8002
     try {
-      fetch("http://127.0.0.1:8002/live_session/start", {
+      fetch(`${CV_API_BASE}/live_session/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exercise }),
@@ -455,7 +456,7 @@ export const CVExerciseView: React.FC = () => {
 
     // Optional background stop on port 8002
     try {
-      fetch("http://127.0.0.1:8002/live_session/stop", { method: "POST" }).catch(() => {});
+      fetch(`${CV_API_BASE}/live_session/stop`, { method: "POST" }).catch(() => {});
     } catch {}
 
     // Grab real snapshot from webcam
