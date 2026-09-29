@@ -92,7 +92,6 @@ export default function Login() {
       storeSession(token, user);
       router.push('/');
     } catch (err: any) {
-      // Fallback for local preview without backend
       const isNetworkOrParseError = 
         err.message.includes('Failed to fetch') || 
         err.message.includes('fetch failed') || 
@@ -100,15 +99,7 @@ export default function Login() {
         err.message.includes('Unexpected token');
 
       if (isNetworkOrParseError) {
-        console.warn("Backend not reachable or returned HTML. Falling back to mock authentication for preview.");
-        const mockUser = {
-          id: 'mock-123',
-          email: formData.email,
-          fullName: 'Preview User',
-          role: 'athlete'
-        };
-        storeSession('mock-preview-token', mockUser);
-        router.push('/');
+        setError('Authentication service is currently offline. Please ensure the backend is running.');
       } else {
         const msg = err.message || 'Login failed. Please check your email and password.';
         setError(msg);

@@ -147,11 +147,9 @@ export default function Register() {
         }
       } catch (loginErr) {
         console.warn('Auto-login attempt failed:', loginErr);
+        setInfo('Account created successfully! Please log in.');
+        setTimeout(() => router.push('/login'), 2000);
       }
-
-      // Fallback session & direct profile navigation
-      storeSession('local_session_' + Date.now(), { email, fullName: cleanName, role: 'athlete' });
-      router.push('/?view=profile');
     } catch (err: any) {
       const isNetworkOrParseError = 
         err.message.includes('Failed to fetch') || 
@@ -160,9 +158,7 @@ export default function Register() {
         err.message.includes('Unexpected token');
         
       if (isNetworkOrParseError) {
-        console.warn('Backend not reachable or returned HTML. Falling back to local session.');
-        storeSession('local_session_' + Date.now(), { email: formData.email.trim().toLowerCase(), fullName: formData.fullName.trim(), role: 'athlete' });
-        router.push('/dashboard');
+        setError('Authentication service is currently offline. Please ensure the backend is running.');
       } else {
         const msg = err.message || 'Registration failed. Please check your connection and try again.';
         setError(msg);
