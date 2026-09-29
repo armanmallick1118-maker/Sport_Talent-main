@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { CV_API_BASE } from "../lib/api";
 import {
   Camera,
   Play,
@@ -26,6 +27,7 @@ import {
   Square,
   SwitchCamera,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 
 interface BiomechanicalEstimates {
   estimated_power_watts: number;
@@ -46,19 +48,6 @@ interface KinematicReportData {
   estimates?: BiomechanicalEstimates;
   summary: string;
 }
-
-const getCVBaseUrl = (): string => {
-  if (typeof window !== "undefined" && (window as any).__CV_API_URL__) {
-    return (window as any).__CV_API_URL__;
-  }
-  if (process.env.NEXT_PUBLIC_CV_URL) {
-    return process.env.NEXT_PUBLIC_CV_URL;
-  }
-  if (typeof window !== "undefined" && window.location.protocol === "https:") {
-    return "/cv";
-  }
-  return "http://127.0.0.1:8002";
-};
 
 export const CVExerciseView: React.FC = () => {
   const [inputSource, setInputSource] = useState<"video_upload" | "prana_live">("video_upload");
@@ -115,7 +104,7 @@ export const CVExerciseView: React.FC = () => {
     let isMounted = true;
     const checkBackend = async () => {
       try {
-        const res = await fetch(`${getCVBaseUrl()}/health`, { cache: "no-store" });
+        const res = await fetch(`${CV_API_BASE}/health`, { cache: "no-store" });
         if (res.ok) {
           const data = await res.json();
           if (data.status === "ok" && isMounted) setIsBackendConnected(true);
@@ -264,7 +253,7 @@ export const CVExerciseView: React.FC = () => {
         formData.append("exercise", exercise);
 
         setAnalysisProgress(50);
-        const res = await fetch(`${getCVBaseUrl()}/analyze_video_upload`, {
+        const res = await fetch(`${CV_API_BASE}/analyze_video_upload`, {
           method: "POST",
           body: formData,
         });
@@ -358,7 +347,7 @@ export const CVExerciseView: React.FC = () => {
 
     // Optional background notification to port 8002
     try {
-      fetch(`${getCVBaseUrl()}/live_session/start`, {
+      fetch(`${CV_API_BASE}/live_session/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ exercise }),
@@ -467,7 +456,7 @@ export const CVExerciseView: React.FC = () => {
 
     // Optional background stop on port 8002
     try {
-      fetch(`${getCVBaseUrl()}/live_session/stop`, { method: "POST" }).catch(() => {});
+      fetch(`${CV_API_BASE}/live_session/stop`, { method: "POST" }).catch(() => {});
     } catch {}
 
     // Grab real snapshot from webcam
@@ -518,7 +507,7 @@ export const CVExerciseView: React.FC = () => {
             <Activity className="w-3.5 h-3.5 text-[#B7F34A]" />
             Computer Vision Kinematics &bull; PRANA Motion AI
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Exercise CV Coach &amp; Video Analysis
           </h1>
           <p className="text-xs text-[#A4AEA8] mt-1">
@@ -770,7 +759,7 @@ export const CVExerciseView: React.FC = () => {
                     </div>
                     <div>
                       <div className="text-sm font-bold text-white">PRANA Live Motion Camera</div>
-                      <p className="text-xs text-slate-400 mt-1 max-w-sm">
+                      <p className="text-sm text-[var(--muted)] mt-1 max-w-sm">
                         Activate your camera for real-time joint kinematic posture tracking, repetition detection, and athletic velocity measurements.
                       </p>
                     </div>
@@ -937,57 +926,61 @@ export const CVExerciseView: React.FC = () => {
               )}
 
               {/* Form Deviations & Faults Log */}
-              <div className="p-4 rounded-xl border border-[#27332D] bg-[#111815] space-y-3">
-                <div className="flex items-center justify-between text-xs font-bold text-white uppercase tracking-wider font-mono">
-                  <span>Detected Biomechanical Events</span>
-                  <span className="text-[10px] text-slate-400">
-                    {kinematicReport.deviations.length} Events Logged
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  {kinematicReport.deviations.map((dev, dIdx) => (
-                    <div
-                      key={dIdx}
-                      className="p-2.5 bg-[#0B100E] rounded-lg border border-[#27332D] flex items-center justify-between text-xs"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-slate-500 text-[10px]">{dev.time}</span>
-                        <span className="text-slate-300">{dev.issue}</span>
-                      </div>
-                      <span
-                        className={`text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold ${
-                          dev.severity === "high"
-                            ? "bg-red-500/20 text-red-300 border border-red-500/40"
-                            : dev.severity === "medium"
-                            ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                            : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                        }`}
+              <CollapsibleSection
+                title="Detected Biomechanical Events"
+                subtitle={`${kinematicReport.deviations.length} Events Logged`}
+                icon={<Activity className="w-4 h-4" />}
+                defaultOpen={false}
+              >
+                <div className="p-4 rounded-xl border border-[#27332D] bg-[#111815] space-y-3 mt-4">
+                  <div className="space-y-2">
+                    {kinematicReport.deviations.map((dev, dIdx) => (
+                      <div
+                        key={dIdx}
+                        className="p-2.5 bg-[#0B100E] rounded-lg border border-[#27332D] flex items-center justify-between text-xs"
                       >
-                        {dev.severity}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Keyframe Images (Extracted from Video/Camera) */}
-              {kinematicReport.keyFrames && kinematicReport.keyFrames.length > 0 && (
-                <div className="p-4 rounded-xl border border-[#27332D] bg-[#111815] space-y-3">
-                  <div className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                    Extracted Peak Flexion Keyframes
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {kinematicReport.keyFrames.map((kf, kIdx) => (
-                      <div key={kIdx} className="relative rounded-lg overflow-hidden border border-[#27332D] bg-black aspect-video">
-                        <img src={kf.image} alt="Keyframe" className="w-full h-full object-cover" />
-                        <div className="absolute bottom-1 left-1 bg-black/80 px-2 py-0.5 rounded text-[9px] font-mono text-[#B7F34A]">
-                          {kf.time} &bull; {kf.angle}°
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-slate-500 text-[10px]">{dev.time}</span>
+                          <span className="text-slate-300">{dev.issue}</span>
                         </div>
+                        <span
+                          className={`text-[10px] font-mono px-2 py-0.5 rounded uppercase font-semibold ${
+                            dev.severity === "high"
+                              ? "bg-red-500/20 text-red-300 border border-red-500/40"
+                              : dev.severity === "medium"
+                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                              : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                          }`}
+                        >
+                          {dev.severity}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
+              </CollapsibleSection>
+
+              {/* Keyframe Images (Extracted from Video/Camera) */}
+              {kinematicReport.keyFrames && kinematicReport.keyFrames.length > 0 && (
+                <CollapsibleSection
+                  title="Extracted Peak Flexion Keyframes"
+                  subtitle="Raw visual data"
+                  icon={<Camera className="w-4 h-4" />}
+                  defaultOpen={false}
+                >
+                  <div className="p-4 rounded-xl border border-[#27332D] bg-[#111815] space-y-3 mt-4">
+                    <div className="grid grid-cols-2 gap-2">
+                      {kinematicReport.keyFrames.map((kf, kIdx) => (
+                        <div key={kIdx} className="relative rounded-lg overflow-hidden border border-[#27332D] bg-black aspect-video">
+                          <img src={kf.image} alt="Keyframe" className="w-full h-full object-cover" />
+                          <div className="absolute bottom-1 left-1 bg-black/80 px-2 py-0.5 rounded text-[9px] font-mono text-[#B7F34A]">
+                            {kf.time} &bull; {kf.angle}°
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CollapsibleSection>
               )}
 
               {/* Executive Summary */}

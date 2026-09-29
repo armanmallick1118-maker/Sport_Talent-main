@@ -25,6 +25,7 @@ import {
   Activity,
   Compass,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 
 export interface Milestone {
   id: string;
@@ -773,46 +774,46 @@ export const GoalsView: React.FC = () => {
             </div>
 
             {/* Quick Templates Shelf */}
-            <div className="p-6 rounded-2xl border border-[var(--border)] bg-[var(--surface)] space-y-4">
-              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
-                <div className="text-xs font-semibold text-[var(--foreground)] uppercase font-mono tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-[var(--secondary)]" />
-                  Recommended Goal Templates
+            <div className="pt-2 border-t border-[var(--border)]">
+              <CollapsibleSection
+                title="Recommended Goal Templates"
+                subtitle="Use preset templates for quick goal creation"
+                icon={<Sparkles className="w-4 h-4" />}
+                defaultOpen={false}
+              >
+                <div className="space-y-3 mt-4">
+                  {PRESET_TEMPLATES.map((tpl, i) => (
+                    <div
+                      key={i}
+                      className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[var(--primary)]/40 transition-all space-y-2 group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-mono font-bold uppercase text-[var(--secondary)]">
+                          {tpl.category}
+                        </span>
+                        <span className="text-[10px] text-[var(--muted)] font-mono">
+                          {tpl.timeline_weeks} WEEKS
+                        </span>
+                      </div>
+                      <div className="text-xs font-bold text-[var(--foreground)]">
+                        {tpl.title}
+                      </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[11px] font-mono text-[var(--muted)]">
+                          Target: <strong className="text-[var(--primary)]">{tpl.target} {tpl.unit}</strong>
+                        </span>
+                        <button
+                          onClick={() => handleAddTemplate(tpl)}
+                          className="px-2.5 py-1 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[#0B100E] font-bold text-[10px] transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>Add Goal</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-
-              <div className="space-y-3">
-                {PRESET_TEMPLATES.map((tpl, i) => (
-                  <div
-                    key={i}
-                    className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--surface-elevated)] hover:border-[var(--primary)]/40 transition-all space-y-2 group"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono font-bold uppercase text-[var(--secondary)]">
-                        {tpl.category}
-                      </span>
-                      <span className="text-[10px] text-[var(--muted)] font-mono">
-                        {tpl.timeline_weeks} WEEKS
-                      </span>
-                    </div>
-                    <div className="text-xs font-bold text-[var(--foreground)]">
-                      {tpl.title}
-                    </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="text-[11px] font-mono text-[var(--muted)]">
-                        Target: <strong className="text-[var(--primary)]">{tpl.target} {tpl.unit}</strong>
-                      </span>
-                      <button
-                        onClick={() => handleAddTemplate(tpl)}
-                        className="px-2.5 py-1 rounded-lg bg-[var(--primary)]/10 text-[var(--primary)] hover:bg-[var(--primary)] hover:text-[#0B100E] font-bold text-[10px] transition-all cursor-pointer flex items-center gap-1"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>Add Goal</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              </CollapsibleSection>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { API_BASE } from "../lib/api";
 import {
   Send,
   Sparkles,
@@ -687,7 +688,7 @@ export const AICoachView: React.FC<AICoachProps> = ({
       const telemetry = gatherAllAppData();
       const token = typeof window !== "undefined" ? localStorage.getItem("athena_token") : null;
 
-      const chatPayload = {
+      const res = await fetch(`${API_BASE}/ai-suggestions/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -699,12 +700,9 @@ export const AICoachView: React.FC<AICoachProps> = ({
           telemetry,
           userVerdict: explicitVerdict || undefined,
         }),
-      };
+      });
 
-      const res = await fetch("/api/v1/ai-suggestions/chat", chatPayload)
-        .catch(() => fetch("http://127.0.0.1:8000/api/v1/ai-suggestions/chat", chatPayload));
-
-      if (res && res.ok) {
+      if (res.ok) {
         const data = await res.json();
         let replyText = data.data?.content || data.reply || data.coach_response;
         if (replyText) {
@@ -885,13 +883,13 @@ Restorative sleep and autonomic recovery targets have been logged to your Goal E
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
           <div className="text-xs font-semibold tracking-wider text-amber-400 uppercase flex items-center gap-1.5 font-mono">
             <ShieldCheck className="w-4 h-4 text-amber-400" />
             Head Performance Mentor &bull; Adaptive AI Intelligence
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1 flex items-center gap-2">
+          <h1 className="page-title mt-1 flex items-center gap-2">
             Coach Jack
             <span
               className={`text-xs px-2.5 py-0.5 rounded-full border font-mono uppercase ${
@@ -911,7 +909,7 @@ Restorative sleep and autonomic recovery targets have been logged to your Goal E
               Groq Engine (120B / 27B)
             </span>
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Collects holistic telemetry from all app subsystems, audits weaknesses, interrogates your unfitness verdict, and synthesizes bespoke protocols.
           </p>
         </div>

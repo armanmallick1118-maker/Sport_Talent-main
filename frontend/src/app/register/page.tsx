@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Eye, EyeOff, Lock, Mail, User, Loader2, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Loader2, ArrowRight } from 'lucide-react';
 import BrandMark from '../../components/BrandMark';
+import { API_BASE } from '../../lib/api';
 
 const field =
   'w-full rounded-xl border border-[#27332D] bg-[#161F1B] py-3 pl-11 pr-11 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition focus:border-[#B7F34A]';
@@ -17,38 +18,10 @@ const storeSession = (token: string, user: any) => {
     localStorage.setItem('userId', user?.id || '');
     localStorage.setItem('userEmail', user?.email || '');
     localStorage.setItem('user', JSON.stringify(user || {}));
-    // Store auth token in cookie for SSR and Next.js middleware verification
-    document.cookie = `token=${token}; path=/; max-age=2592000; SameSite=Lax`;
   } catch (err) {
     console.error('Failed to store session:', err);
   }
 };
-
-const fetchAuth = async (endpoint: string, options: RequestInit) => {
-  const hosts = [
-    '', // 1st priority: relative endpoint handled seamlessly by Next.js proxy rewrite
-    process.env.NEXT_PUBLIC_API_URL || '',
-    'https://sporttalent-production.up.railway.app',
-    typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:8000` : '',
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-  ];
-  const uniqueHosts = Array.from(new Set(hosts.filter(Boolean)));
-
-  let lastErr = null;
-  for (const host of uniqueHosts) {
-    try {
-      const cleanHost = host.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
-      const fullUrl = cleanHost ? `${cleanHost}${endpoint}` : endpoint;
-      const res = await fetch(fullUrl, options);
-      return res;
-    } catch (err) {
-      lastErr = err;
-    }
-  }
-  throw lastErr || new Error('Backend connection refused on port 8000. Please ensure the backend server is running.');
-};
-
 
 export default function Register() {
   const router = useRouter();
@@ -60,44 +33,18 @@ export default function Register() {
     role: 'athlete',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
+  // Security captcha
   const [captchaNum1, setCaptchaNum1] = useState(3);
   const [captchaNum2, setCaptchaNum2] = useState(4);
-  const [userCaptcha, setUserCaptcha] = useState('7');
+  const [userCaptcha, setUserCaptcha] = useState('');
 
   useEffect(() => {
-    const n1 = Math.floor(Math.random() * 9) + 1;
-    const n2 = Math.floor(Math.random() * 9) + 1;
-    setCaptchaNum1(n1);
-    setCaptchaNum2(n2);
-    setUserCaptcha(String(n1 + n2));
-
-    // Security guard: Invalidate any previous session when visiting register page
-    try {
-      localStorage.removeItem('token');
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('user');
-      sessionStorage.clear();
-      document.cookie = 'token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('prana_auth_change'));
-      }
-    } catch {}
-
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const emailParam = urlParams.get('email');
-      if (emailParam) {
-        setFormData((prev) => ({ ...prev, email: emailParam }));
-        setInfo(`Please complete your registration for ${emailParam}.`);
-      }
-    }
+    setCaptchaNum1(Math.floor(Math.random() * 9) + 1);
+    setCaptchaNum2(Math.floor(Math.random() * 9) + 1);
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,27 +67,11 @@ export default function Register() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      if (formData.password.length === formData.confirmPassword.length) {
-        let diffIdx = -1;
-        for (let i = 0; i < formData.password.length; i++) {
-          if (formData.password[i] !== formData.confirmPassword[i]) {
-            diffIdx = i;
-            break;
-          }
-        }
-        if (diffIdx !== -1) {
-          setError(
-            `Passwords do not match: Character ${diffIdx + 1} differs. ` +
-            `Password has "${formData.password[diffIdx]}", but Confirm has "${formData.confirmPassword[diffIdx]}".`
-          );
-          return;
-        }
-      }
       setError('Passwords do not match. Please verify both passwords.');
       return;
     }
 
-    if (userCaptcha && parseInt(userCaptcha) !== captchaNum1 + captchaNum2) {
+    if (parseInt(userCaptcha) !== captchaNum1 + captchaNum2) {
       setError(`Captcha incorrect. What is ${captchaNum1} + ${captchaNum2}?`);
       return;
     }
@@ -151,7 +82,7 @@ export default function Register() {
       const cleanName = formData.fullName.trim();
 
       // 1. Call registration endpoint
-      const regRes = await fetchAuth('/api/v1/auth/register', {
+      const regRes = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -162,14 +93,14 @@ export default function Register() {
         }),
       });
 
-      const regData = await regRes.json().catch(() => ({}));
+      const regData = await regRes.json();
 
       if (!regRes.ok) {
-        if (regRes.status === 400 && regData.error?.includes('already exists')) {
-          setError(regData.error);
-          return;
-        }
-        console.warn('Registration server endpoint returned non-200, creating resilient local profile:', regData);
+        throw new Error(
+          regData.error ||
+          (regData.details && regData.details[0]?.message) ||
+          'Registration failed. Please try again.'
+        );
       }
 
       setInfo('Account created successfully! Preparing your profile...');
@@ -197,9 +128,8 @@ export default function Register() {
       localStorage.setItem('athena_user_profile', JSON.stringify(initialProfile));
 
       // 2. Auto-login the newly created user
-      localStorage.setItem('prana_profile_incomplete', 'true');
       try {
-        const loginRes = await fetchAuth('/api/v1/auth/login', {
+        const loginRes = await fetch(`${API_BASE}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -210,18 +140,18 @@ export default function Register() {
 
         if (loginRes.ok) {
           const loginData = await loginRes.json();
-          storeSession(loginData.token, { ...loginData.user, fullName: cleanName, profileComplete: false });
-          // Navigate to Home page where the profile completion prompt will be displayed
-          window.location.href = '/';
+          storeSession(loginData.token, { ...loginData.user, fullName: cleanName });
+          // Directly navigate to the profile section for the new user
+          router.push('/?view=profile');
           return;
         }
       } catch (loginErr) {
         console.warn('Auto-login attempt failed:', loginErr);
       }
 
-      // Fallback session & navigate to Home page
-      storeSession('local_session_' + Date.now(), { email, fullName: cleanName, role: 'athlete', profileComplete: false });
-      window.location.href = '/';
+      // Fallback session & direct profile navigation
+      storeSession('local_session_' + Date.now(), { email, fullName: cleanName, role: 'athlete' });
+      router.push('/?view=profile');
     } catch (err: any) {
       const msg = err.message || 'Registration failed. Please check your connection and try again.';
       setError(msg);
@@ -321,14 +251,14 @@ export default function Register() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Create Password (min. 6 chars)"
-              className={`${field} ${showPassword ? 'font-mono tracking-wider' : ''}`}
+              className={field}
               minLength={6}
               required
             />
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300"
               aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -336,79 +266,18 @@ export default function Register() {
           </div>
 
           {/* Confirm Password */}
-          <div className="space-y-1.5">
-            <div className="relative">
-              <Lock size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm Password"
-                className={`${field} ${showConfirmPassword ? 'font-mono tracking-wider' : ''} ${
-                  formData.confirmPassword
-                    ? formData.password === formData.confirmPassword
-                      ? 'border-[#B7F34A]/80 focus:border-[#B7F34A]'
-                      : 'border-red-500/70 focus:border-red-400'
-                    : ''
-                }`}
-                minLength={6}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-slate-300 transition-colors"
-                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
-              >
-                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-
-            {/* Real-time Match Feedback */}
-            {formData.confirmPassword.length > 0 && (
-              <div className="px-1 text-xs transition-all">
-                {formData.password === formData.confirmPassword ? (
-                  <p className="flex items-center gap-1.5 font-medium text-[#B7F34A]">
-                    <CheckCircle2 size={13} />
-                    Passwords match
-                  </p>
-                ) : (
-                  <div className="flex items-center justify-between gap-2 rounded-lg bg-red-500/10 border border-red-500/20 px-2.5 py-1.5 text-red-400">
-                    <span className="flex items-center gap-1">
-                      <AlertCircle size={13} className="shrink-0" />
-                      {formData.password.length === formData.confirmPassword.length ? (
-                        (() => {
-                          let diff = -1;
-                          for (let i = 0; i < formData.password.length; i++) {
-                            if (formData.password[i] !== formData.confirmPassword[i]) {
-                              diff = i;
-                              break;
-                            }
-                          }
-                          return diff !== -1 ? (
-                            <span>
-                              Diff at pos {diff + 1}: &quot;<b className="text-white font-mono">{formData.password[diff]}</b>&quot; vs &quot;<b className="text-white font-mono">{formData.confirmPassword[diff]}</b>&quot;
-                            </span>
-                          ) : (
-                            'Passwords differ'
-                          );
-                        })()
-                      ) : (
-                        'Passwords do not match'
-                      )}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, confirmPassword: prev.password }))}
-                      className="text-[#B7F34A] hover:underline font-semibold text-[11px] shrink-0"
-                    >
-                      Sync
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="relative">
+            <Lock size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm Password"
+              className={field}
+              minLength={6}
+              required
+            />
           </div>
 
           {/* Security Captcha */}
