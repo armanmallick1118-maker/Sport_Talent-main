@@ -77,13 +77,13 @@ export const ProfileView: React.FC = () => {
       if (saved) {
         const data = JSON.parse(saved);
         setFullName(data.fullName || registeredName || "");
-        if (data.age !== undefined) setAge(data.age);
+        if (data.age !== undefined && data.age !== "") setAge(Number(data.age));
         if (data.gender !== undefined) setGender(data.gender);
         if (data.customGender !== undefined) setCustomGender(data.customGender);
         if (data.fitnessLevel !== undefined) setFitnessLevel(data.fitnessLevel);
         if (data.activityLevel !== undefined) setActivityLevel(data.activityLevel);
-        if (data.heightCm !== undefined) setHeightCm(data.heightCm);
-        if (data.weightKg !== undefined) setWeightKg(data.weightKg);
+        if (data.heightCm !== undefined && data.heightCm !== "") setHeightCm(Number(data.heightCm));
+        if (data.weightKg !== undefined && data.weightKg !== "") setWeightKg(Number(data.weightKg));
         if (data.dietaryPref !== undefined) setDietaryPref(data.dietaryPref);
         if (data.equipment !== undefined) setEquipment(data.equipment);
         if (data.selectedSports !== undefined && Array.isArray(data.selectedSports)) setSelectedSports(data.selectedSports);
@@ -212,16 +212,16 @@ export const ProfileView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase flex items-center gap-1.5 font-mono">
+          <div className="section-label flex items-center gap-1.5">
             <User className="w-3.5 h-3.5" />
             Personal Fitness Profile &bull; Identity Architecture
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Athlete Profile &amp; Biometrics
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Calibrates your Digital Twin, Coach Jack mentorship, and customized kinematic benchmarks.
           </p>
         </div>

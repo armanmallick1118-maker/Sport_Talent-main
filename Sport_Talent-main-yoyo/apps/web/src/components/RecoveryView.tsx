@@ -20,6 +20,7 @@ import {
   Flame,
   AlertTriangle,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 
 interface RecoveryProps {
   readinessData?: any;
@@ -237,7 +238,7 @@ export const RecoveryView: React.FC<RecoveryProps> = ({ readinessData }) => {
             <Moon className="w-3.5 h-3.5 text-[#B7F34A]" />
             Explainable Recovery &bull; PRANA Biometrics
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Sleep &amp; Recovery Engine
           </h1>
           <p className="text-xs text-[#A4AEA8] mt-1">
@@ -439,23 +440,32 @@ export const RecoveryView: React.FC<RecoveryProps> = ({ readinessData }) => {
             </div>
 
             {/* Sleep Stages Decomposition Bar */}
-            <div className="p-3.5 bg-[#111815] rounded-xl border border-[#27332D] space-y-2">
-              <div className="flex items-center justify-between text-[11px] font-mono">
-                <span className="text-white font-semibold">Sleep Stages Breakdown</span>
-                <span className="text-[#A4AEA8]">{sleepHours}h Total</span>
-              </div>
-              <div className="h-3 w-full rounded-full overflow-hidden flex bg-slate-900 border border-[#27332D]">
-                <div style={{ width: "22%" }} className="h-full bg-indigo-500" title="Deep Sleep (22%)"></div>
-                <div style={{ width: "24%" }} className="h-full bg-[#25D9D0]" title="REM Sleep (24%)"></div>
-                <div style={{ width: "48%" }} className="h-full bg-[#B7F34A]" title="Light Sleep (48%)"></div>
-                <div style={{ width: "6%" }} className="h-full bg-rose-500" title="Awake / Restless (6%)"></div>
-              </div>
-              <div className="grid grid-cols-4 gap-1 text-[10px] font-mono text-slate-400 pt-1 text-center">
-                <div><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1"></span>Deep 22%</div>
-                <div><span className="inline-block w-2 h-2 rounded-full bg-[#25D9D0] mr-1"></span>REM 24%</div>
-                <div><span className="inline-block w-2 h-2 rounded-full bg-[#B7F34A] mr-1"></span>Light 48%</div>
-                <div><span className="inline-block w-2 h-2 rounded-full bg-rose-500 mr-1"></span>Awake 6%</div>
-              </div>
+            <div className="pt-2">
+              <CollapsibleSection
+                title="Detailed Sleep Architecture"
+                subtitle="View sleep stages breakdown"
+                icon={<Moon className="w-4 h-4" />}
+                defaultOpen={false}
+              >
+                <div className="p-3.5 bg-[#111815] rounded-xl border border-[#27332D] space-y-2 mt-3">
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-white font-semibold">Sleep Stages Breakdown</span>
+                    <span className="text-[#A4AEA8]">{sleepHours}h Total</span>
+                  </div>
+                  <div className="h-3 w-full rounded-full overflow-hidden flex bg-slate-900 border border-[#27332D]">
+                    <div style={{ width: "22%" }} className="h-full bg-indigo-500" title="Deep Sleep (22%)"></div>
+                    <div style={{ width: "24%" }} className="h-full bg-[#25D9D0]" title="REM Sleep (24%)"></div>
+                    <div style={{ width: "48%" }} className="h-full bg-[#B7F34A]" title="Light Sleep (48%)"></div>
+                    <div style={{ width: "6%" }} className="h-full bg-rose-500" title="Awake / Restless (6%)"></div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1 text-[10px] font-mono text-slate-400 pt-1 text-center">
+                    <div><span className="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1"></span>Deep 22%</div>
+                    <div><span className="inline-block w-2 h-2 rounded-full bg-[#25D9D0] mr-1"></span>REM 24%</div>
+                    <div><span className="inline-block w-2 h-2 rounded-full bg-[#B7F34A] mr-1"></span>Light 48%</div>
+                    <div><span className="inline-block w-2 h-2 rounded-full bg-rose-500 mr-1"></span>Awake 6%</div>
+                  </div>
+                </div>
+              </CollapsibleSection>
             </div>
           </div>
         </div>

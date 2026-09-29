@@ -23,6 +23,7 @@ import {
   Sliders,
   ShieldCheck,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 import {
   AreaChart,
   Area,
@@ -252,16 +253,16 @@ export const HealthHubView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
           <div className="text-xs font-semibold tracking-wider text-purple-400 uppercase flex items-center gap-1.5 font-mono">
             <FileText className="w-3.5 h-3.5 text-purple-400" />
             Physiological Diagnostics &bull; AI Health Hub
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             AI Health Report &amp; Lab Intelligence
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-sm text-[var(--muted)] mt-1">
             Synthesizes blood panels, cellular biomarkers, and physical training into your PRANA Health Profile.
           </p>
         </div>
@@ -388,87 +389,93 @@ export const HealthHubView: React.FC = () => {
             </div>
           </div>
 
-          {/* Historical Longitudinal Trends */}
-          <div className="athena-card p-6 border-slate-800 bg-slate-950 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
-              <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-                  Longitudinal Health Score Trend
-                </h3>
-                <p className="text-xs text-slate-400">Tracking health index changes across periods</p>
+          {/* Historical Longitudinal Trends - Collapsed by default */}
+          <CollapsibleSection
+            title="Historical Longitudinal Trends"
+            subtitle="Tracking health index changes across periods"
+            icon={<TrendingUp className="w-4 h-4" />}
+            defaultOpen={false}
+          >
+            <div className="athena-card p-6 border-slate-800 bg-slate-950 space-y-4 mt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
+                    Trend Graph
+                  </h3>
+                </div>
+
+                {/* Timeframe selector */}
+                <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 self-start">
+                  <button
+                    onClick={() => setTimeframe("daily")}
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      timeframe === "daily" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Daily (7d)
+                  </button>
+                  <button
+                    onClick={() => setTimeframe("weekly")}
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      timeframe === "weekly" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Weekly (4w)
+                  </button>
+                  <button
+                    onClick={() => setTimeframe("monthly")}
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      timeframe === "monthly" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Monthly (5m)
+                  </button>
+                </div>
               </div>
 
-              {/* Timeframe selector */}
-              <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 self-start">
-                <button
-                  onClick={() => setTimeframe("daily")}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                    timeframe === "daily" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  Daily (7d)
-                </button>
-                <button
-                  onClick={() => setTimeframe("weekly")}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                    timeframe === "weekly" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  Weekly (4w)
-                </button>
-                <button
-                  onClick={() => setTimeframe("monthly")}
-                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                    timeframe === "monthly" ? "bg-purple-600 text-white" : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  Monthly (5m)
-                </button>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={activeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#9333ea" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
+                    <YAxis domain={[60, 100]} stroke="#64748b" fontSize={11} />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px" }}
+                      itemStyle={{ fontSize: "12px" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="overall"
+                      name="Overall AI Score"
+                      stroke="#a855f7"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#purpleGrad)"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="health"
+                      name="Lab Health"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#blueGrad)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
-
-            <div className="h-64 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={activeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="purpleGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#9333ea" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#9333ea" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="blueGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={11} />
-                  <YAxis domain={[60, 100]} stroke="#64748b" fontSize={11} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", borderRadius: "8px" }}
-                    itemStyle={{ fontSize: "12px" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="overall"
-                    name="Overall AI Score"
-                    stroke="#a855f7"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#purpleGrad)"
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="health"
-                    name="Lab Health"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#blueGrad)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          </CollapsibleSection>
 
           {/* Strengths, Weaknesses, Critical Alerts */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -573,7 +580,7 @@ export const HealthHubView: React.FC = () => {
           <div className="athena-card p-6 border-slate-800 bg-slate-950 space-y-5">
             <div>
               <h2 className="text-lg font-bold text-white">Interactive Lab Report Entry</h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-sm text-[var(--muted)] mt-1">
                 Select a diagnostic blood panel and input your lab results. PRANA will evaluate biomarkers against clinical athletic ranges and recalibrate your AI Health Score.
               </p>
             </div>

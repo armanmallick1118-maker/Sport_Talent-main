@@ -6,14 +6,15 @@ import {
   Moon,
   Zap,
   CheckCircle2,
-  AlertCircle,
   TrendingUp,
   ArrowRight,
   Info,
-  Clock,
-  Target,
   Sparkles,
   FileText,
+  Bot,
+  Utensils,
+  Target,
+  ChevronDown,
 } from "lucide-react";
 import { ViewType } from "./Sidebar";
 
@@ -25,6 +26,98 @@ interface DashboardProps {
   todayNutrition?: any;
 }
 
+/* ——————————————————————————————————————————
+   Stat Ring – visual ring + number for each metric
+   —————————————————————————————————————————— */
+const StatRing: React.FC<{
+  label: string;
+  value: number;
+  suffix?: string;
+  sub: string;
+  icon: React.ReactNode;
+  color: string;
+  onClick?: () => void;
+}> = ({ label, value, suffix = "", sub, icon, color, onClick }) => {
+  const pct = Math.min(value, 100);
+  const circumference = 2 * Math.PI * 36;
+  const offset = circumference - (pct / 100) * circumference;
+
+  return (
+    <button
+      onClick={onClick}
+      className="prana-card p-5 flex flex-col items-center gap-3 hover:border-[var(--primary)]/40 transition-all group cursor-pointer"
+    >
+      <div className="relative w-20 h-20">
+        <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+          <circle
+            cx="40"
+            cy="40"
+            r="36"
+            fill="none"
+            stroke="var(--border)"
+            strokeWidth="5"
+          />
+          <circle
+            cx="40"
+            cy="40"
+            r="36"
+            fill="none"
+            stroke={color}
+            strokeWidth="5"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            className="transition-all duration-700 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-xl font-bold font-mono text-[var(--foreground)]">
+            {value}
+            {suffix}
+          </span>
+        </div>
+      </div>
+      <div className="text-center">
+        <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-[var(--foreground)]">
+          {icon}
+          {label}
+        </div>
+        <div className="text-[11px] text-[var(--muted)] mt-0.5">{sub}</div>
+      </div>
+    </button>
+  );
+};
+
+/* ——————————————————————————————————————————
+   Quick Link Card
+   —————————————————————————————————————————— */
+const QuickLink: React.FC<{
+  label: string;
+  desc: string;
+  icon: React.ReactNode;
+  borderColor: string;
+  onClick: () => void;
+}> = ({ label, desc, icon, borderColor, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`prana-card p-4 text-left hover:border-[var(--primary)]/40 transition-all group flex items-start gap-3 ${borderColor}`}
+  >
+    <div className="shrink-0 mt-0.5">{icon}</div>
+    <div className="min-w-0">
+      <div className="text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--primary)] transition-colors">
+        {label}
+      </div>
+      <div className="text-[11px] text-[var(--muted)] mt-0.5 leading-relaxed">
+        {desc}
+      </div>
+    </div>
+    <ArrowRight className="w-4 h-4 text-[var(--muted)] group-hover:text-[var(--primary)] transition-colors shrink-0 mt-1 opacity-0 group-hover:opacity-100" />
+  </button>
+);
+
+/* ——————————————————————————————————————————
+   MAIN DASHBOARD VIEW
+   —————————————————————————————————————————— */
 export const DashboardView: React.FC<DashboardProps> = ({
   onNavigate,
   twinData,
@@ -36,7 +129,7 @@ export const DashboardView: React.FC<DashboardProps> = ({
   const fitness = 78;
   const [activity, setActivity] = React.useState<number>(82);
   const [consistency, setConsistency] = React.useState<number>(76);
-  const [workoutCount, setWorkoutCount] = React.useState<number>(2);
+  const [showTodayDetails, setShowTodayDetails] = React.useState(false);
 
   // Live Dynamic State from AI Health Report & Lab Report Manager
   const [aiHealthScore, setAiHealthScore] = React.useState<number>(88);
@@ -62,7 +155,6 @@ export const DashboardView: React.FC<DashboardProps> = ({
         if (savedWorkouts) {
           const wList = JSON.parse(savedWorkouts);
           if (Array.isArray(wList)) {
-            setWorkoutCount(wList.length);
             setConsistency(Math.min(98, 70 + wList.length * 4));
             const totalMins = wList.reduce((acc: number, cur: any) => acc + (cur.duration || 0), 0);
             setActivity(Math.min(99, 70 + Math.round(totalMins / 5)));
@@ -126,254 +218,259 @@ export const DashboardView: React.FC<DashboardProps> = ({
     intensity: "MODERATE",
   };
 
+  // Time-based greeting
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+
   return (
-    <div className="space-y-6">
-      {/* Header Greeting */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-5">
-        <div>
-          <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase">
-            Personal Intelligence System
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-0.5">
-            Good evening, {userName}
+    <div className="space-y-8">
+      {/* ═══════════════════════════════════════
+          ZONE 1: Greeting + Status Glance
+          ═══════════════════════════════════════ */}
+      <div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
+            {greeting}, {userName}
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            System status calibrated from longitudinal baseline. Twin v1 active.
+          <p className="text-sm text-[var(--muted)] mt-1">
+            Here&apos;s your personalized fitness overview
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onNavigate("twin")}
-            className="px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)] text-xs font-medium text-[var(--foreground)] hover:border-[var(--primary)] transition-colors flex items-center gap-1.5"
-          >
-            <span className="w-2 h-2 rounded-full bg-[var(--primary)]"></span>
-            Twin Calibration
-          </button>
+
+        {/* 4 Stat Rings */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatRing
+            label="Fitness"
+            value={fitness}
+            sub="+2.4 pts vs 30d"
+            icon={<Activity className="w-3.5 h-3.5" />}
+            color="var(--info)"
+            onClick={() => onNavigate("fitness")}
+          />
+          <StatRing
+            label="Readiness"
+            value={readiness}
+            sub="7.8h sleep • Good"
+            icon={<Moon className="w-3.5 h-3.5" />}
+            color="var(--success)"
+            onClick={() => onNavigate("recovery")}
+          />
+          <StatRing
+            label="Activity"
+            value={activity}
+            sub="42 / 50 min today"
+            icon={<Zap className="w-3.5 h-3.5" />}
+            color="var(--warning)"
+            onClick={() => onNavigate("fitness")}
+          />
+          <StatRing
+            label="Consistency"
+            value={consistency}
+            suffix="%"
+            sub="4-week adherence"
+            icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+            color="var(--accent-cyan)"
+            onClick={() => onNavigate("progress")}
+          />
         </div>
       </div>
 
-      {/* 4 Core Quantitative Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="athena-card p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-            <span>FITNESS</span>
-            <Activity className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-1.5 font-mono">{fitness}</div>
-          <div className="text-[11px] text-emerald-500 mt-1 font-medium flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" />
-            +2.4 pts vs 30d baseline
-          </div>
-        </div>
-
-        <div className="athena-card p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-            <span>READINESS</span>
-            <Moon className="w-4 h-4 text-emerald-500" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-1.5 font-mono">{readiness}</div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            State: <span className="text-emerald-400 font-medium">Good</span> (7.8h sleep)
-          </div>
-        </div>
-
-        <div className="athena-card p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-            <span>ACTIVITY</span>
-            <Zap className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-1.5 font-mono">{activity}</div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            Today: <span className="text-slate-300 font-medium">42 mins</span> / 50 target
-          </div>
-        </div>
-
-        <div className="athena-card p-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
-            <span>CONSISTENCY</span>
-            <CheckCircle2 className="w-4 h-4 text-blue-400" />
-          </div>
-          <div className="text-2xl font-bold text-white mt-1.5 font-mono">{consistency}%</div>
-          <div className="text-[11px] text-slate-400 mt-1">
-            4-week rolling adherence
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Today's State & ATHENA Suggests */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        {/* Today's State (4 cols) */}
-        <div className="lg:col-span-4 athena-card p-5 space-y-4">
-          <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-white uppercase tracking-wider">
-              Today&apos;s State
-            </h2>
-            <span className="text-[11px] font-mono text-slate-500">Live Telemetry</span>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/60 text-xs">
-              <span className="text-slate-400">Recovery Status</span>
-              <span className="badge-clean badge-emerald">Good</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/60 text-xs">
-              <span className="text-slate-400">Sleep Architecture</span>
-              <span className="badge-clean badge-blue">7.8h • 82% Quality</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/60 text-xs">
-              <span className="text-slate-400">Daily Activity Level</span>
-              <span className="badge-clean badge-amber">Low (Below Normal)</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-slate-800/60 text-xs">
-              <span className="text-slate-400">Hydration Intake</span>
-              <span className="text-slate-300 font-mono">1,750 / 2,500 ml</span>
-            </div>
-            <div className="flex items-center justify-between py-2 text-xs">
-              <span className="text-slate-400">Perceived Exertion Fatigue</span>
-              <span className="text-slate-300 font-mono">4 / 10 (Fresh)</span>
-            </div>
-          </div>
-
-          <div className="pt-2">
-            <button
-              onClick={() => onNavigate("recovery")}
-              className="w-full py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5"
-            >
-              Inspect Readiness Breakdown
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* ATHENA Suggests Recommendation Card (8 cols) */}
-        <div className="lg:col-span-8 athena-card p-6 flex flex-col justify-between border-slate-700 bg-slate-900/60">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                <span className="text-xs font-bold tracking-wider text-cyan-400 uppercase">
-                  PRANA SUGGESTS
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="badge-clean badge-blue">
-                  {rec.duration_minutes} min • {rec.intensity}
-                </span>
-              </div>
+      {/* ═══════════════════════════════════════
+          ZONE 2: Today's Action (Focal Point)
+          ═══════════════════════════════════════ */}
+      <div className="prana-card p-6 border-[var(--primary)]/20 bg-[var(--surface-elevated)]/50">
+        <div className="flex flex-col lg:flex-row lg:items-start gap-6">
+          {/* Recommendation */}
+          <div className="flex-1 space-y-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--accent-cyan)] uppercase">
+                <Sparkles className="w-3.5 h-3.5" />
+                PRANA Suggests
+              </span>
+              <span className="text-[10px] font-semibold font-mono px-2 py-0.5 rounded border bg-[var(--accent-cyan)]/12 text-[var(--accent-cyan)] border-[var(--accent-cyan)]/30">
+                {rec.duration_minutes} min • {rec.intensity}
+              </span>
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-white tracking-tight">
+              <h2 className="text-xl font-bold text-[var(--foreground)] tracking-tight">
                 {rec.title}
-              </h3>
-              <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
+              </h2>
+              <p className="text-sm text-[var(--secondary)] mt-1.5 leading-relaxed">
                 {rec.summary}
               </p>
             </div>
 
-            {/* WHY Section - Required Core PRANA Element */}
-            <div className="p-4 rounded-lg bg-slate-950 border border-slate-800 space-y-1.5">
-              <div className="text-[11px] font-bold tracking-wider text-slate-400 uppercase flex items-center gap-1.5">
-                <Info className="w-3.5 h-3.5 text-cyan-400" />
-                WHY IS PRANA RECOMMENDING THIS?
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-normal">
+            {/* Why section */}
+            <div className="p-3.5 rounded-lg bg-[var(--surface)] border border-[var(--border)] flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-[var(--accent-cyan)] shrink-0 mt-0.5" />
+              <p className="text-xs text-[var(--secondary)] leading-relaxed">
                 {rec.reasoning_why}
               </p>
             </div>
+
+            {/* Primary CTA */}
+            <div className="flex flex-wrap gap-3 pt-1">
+              <button
+                onClick={() => onNavigate("fitness")}
+                className="px-6 py-3 rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-[var(--background)] font-bold text-sm transition-all flex items-center gap-2 shadow-md shadow-[var(--primary-glow)]"
+              >
+                Start Session ({rec.duration_minutes} min)
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => onNavigate("coach")}
+                className="px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-elevated)] text-[var(--foreground)] font-medium text-sm transition-all flex items-center gap-2"
+              >
+                <Bot className="w-4 h-4 text-[var(--accent-cyan)]" />
+                Ask Coach Jack
+              </button>
+            </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="pt-5 flex flex-wrap items-center gap-3">
+          {/* Today's State – collapsed by default */}
+          <div className="lg:w-72 shrink-0">
             <button
-              onClick={() => onNavigate("fitness")}
-              className="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors flex items-center gap-2 shadow-sm"
+              onClick={() => setShowTodayDetails(!showTodayDetails)}
+              className="w-full flex items-center justify-between text-xs font-semibold text-[var(--secondary)] uppercase tracking-wider mb-3 hover:text-[var(--foreground)] transition-colors"
             >
-              Start Session ({rec.duration_minutes} min)
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Today&apos;s State</span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                  showTodayDetails ? "rotate-180" : ""
+                }`}
+              />
             </button>
-            <button
-              onClick={() => onNavigate("coach")}
-              className="px-4 py-2.5 rounded-lg bg-amber-950/40 border border-amber-500/40 hover:bg-amber-900/40 text-amber-300 font-medium text-xs transition-colors flex items-center gap-1.5"
+
+            {/* Always show summary */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs py-1.5">
+                <span className="text-[var(--muted)]">Recovery</span>
+                <span className="badge-clean badge-green">Good</span>
+              </div>
+              <div className="flex items-center justify-between text-xs py-1.5">
+                <span className="text-[var(--muted)]">Sleep</span>
+                <span className="text-[var(--secondary)] font-mono">7.8h • 82%</span>
+              </div>
+            </div>
+
+            {/* Expanded details */}
+            <div
+              className={`transition-all duration-300 overflow-hidden ${
+                showTodayDetails
+                  ? "max-h-[300px] opacity-100 mt-2"
+                  : "max-h-0 opacity-0"
+              }`}
             >
-              Consult Coach Jack (Mentor)
-            </button>
-            <button
-              onClick={() => onNavigate("cv")}
-              className="px-4 py-2.5 rounded-lg bg-slate-900 border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
-              PRANA CV Kinematics
-            </button>
-            <button
-              onClick={() => onNavigate("health")}
-              className="px-4 py-2.5 rounded-lg bg-purple-950/40 border border-purple-500/40 hover:bg-purple-900/40 text-purple-300 font-medium text-xs transition-colors flex items-center gap-1.5"
-            >
-              <FileText className="w-3.5 h-3.5 text-purple-400" />
-              Lab Biomarkers Hub
-            </button>
-            <button
-              onClick={() => onNavigate("georadar")}
-              className="px-4 py-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-900/40 text-emerald-300 font-medium text-xs transition-colors flex items-center gap-1.5 shadow-sm"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              Talent Geo Radar (360°)
-            </button>
+              <div className="space-y-2 pt-2 border-t border-[var(--border)]">
+                <div className="flex items-center justify-between text-xs py-1.5">
+                  <span className="text-[var(--muted)]">Activity Level</span>
+                  <span className="badge-clean badge-amber">Low</span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-1.5">
+                  <span className="text-[var(--muted)]">Hydration</span>
+                  <span className="text-[var(--secondary)] font-mono">
+                    1,750 / 2,500 ml
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs py-1.5">
+                  <span className="text-[var(--muted)]">Fatigue</span>
+                  <span className="text-[var(--secondary)] font-mono">
+                    4/10 (Fresh)
+                  </span>
+                </div>
+                <button
+                  onClick={() => onNavigate("recovery")}
+                  className="w-full mt-2 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-xs font-medium text-[var(--secondary)] hover:text-[var(--foreground)] hover:bg-[var(--surface-elevated)] transition-colors flex items-center justify-center gap-1.5"
+                >
+                  Full Readiness Breakdown
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Answers to Core Questions + Lab Biomarker Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="athena-card p-4 space-y-2">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            WHAT CHANGED?
+      {/* ═══════════════════════════════════════
+          ZONE 3: Quick Links (max 4)
+          ═══════════════════════════════════════ */}
+      <div>
+        <h2 className="text-sm font-semibold text-[var(--secondary)] uppercase tracking-wider mb-4">
+          Quick Access
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickLink
+            label="Nutrition Log"
+            desc="Log meals & track macros"
+            icon={<Utensils className="w-5 h-5 text-[var(--warning)]" />}
+            borderColor=""
+            onClick={() => onNavigate("nutrition")}
+          />
+          <QuickLink
+            label="Goals & Progress"
+            desc="Track your active goals"
+            icon={<Target className="w-5 h-5 text-[var(--primary)]" />}
+            borderColor=""
+            onClick={() => onNavigate("goals")}
+          />
+          <QuickLink
+            label="Lab Biomarkers"
+            desc={`Score: ${aiHealthScore} • ${labStatus}`}
+            icon={<FileText className="w-5 h-5 text-purple-400" />}
+            borderColor=""
+            onClick={() => onNavigate("health")}
+          />
+          <QuickLink
+            label="Progress Trends"
+            desc="View longitudinal data"
+            icon={<TrendingUp className="w-5 h-5 text-[var(--accent-cyan)]" />}
+            borderColor=""
+            onClick={() => onNavigate("progress")}
+          />
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════
+          Insight Cards (condensed from original)
+          ═══════════════════════════════════════ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="prana-card p-4 space-y-1.5">
+          <div className="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider flex items-center gap-1.5">
+            <TrendingUp className="w-3 h-3 text-[var(--success)]" />
+            What Changed?
           </div>
-          <div className="text-xs text-slate-300 leading-relaxed">
-            Your cardiovascular output improved by <span className="text-emerald-400 font-semibold">+4.2%</span> over 8 weeks, while resting heart rate lowered by 2 bpm.
+          <div className="text-xs text-[var(--secondary)] leading-relaxed">
+            Cardio output improved by{" "}
+            <span className="text-[var(--success)] font-semibold">+4.2%</span>{" "}
+            over 8 weeks. Resting HR lowered by 2 bpm.
           </div>
         </div>
 
-        <div className="athena-card p-4 space-y-2">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            WHAT CAN I IMPROVE?
+        <div className="prana-card p-4 space-y-1.5">
+          <div className="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-[var(--accent-cyan)]" />
+            Coach Tip
           </div>
-          <div className="text-xs text-slate-300 leading-relaxed">
-            Coach Jack Directive: Shift 15g protein to breakfast to stabilize day-long muscle protein synthesis.
-          </div>
-        </div>
-
-        <div className="athena-card p-4 space-y-2">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-            GOAL MILESTONE
-          </div>
-          <div className="text-xs text-slate-300 leading-relaxed">
-            Target: 5km Pace & Core Mastery. Currently at <span className="text-blue-400 font-semibold">68% completion</span> (Week 4 of 8).
+          <div className="text-xs text-[var(--secondary)] leading-relaxed">
+            Shift 15g protein to breakfast to stabilize muscle protein synthesis
+            throughout the day.
           </div>
         </div>
 
-        <div
-          onClick={() => onNavigate("health")}
-          className="athena-card p-4 space-y-2 border-purple-500/30 bg-purple-950/20 hover:border-purple-500/60 transition-all cursor-pointer group"
-        >
-          <div className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider flex items-center justify-between">
-            <span className="flex items-center gap-1.5 font-mono">
-              <Sparkles className="w-3 h-3 text-purple-400" />
-              AI HEALTH &amp; LABS
-            </span>
-            <span className="text-[10px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-              SCORE: {aiHealthScore}
-            </span>
+        <div className="prana-card p-4 space-y-1.5">
+          <div className="text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider flex items-center gap-1.5">
+            <Target className="w-3 h-3 text-[var(--info)]" />
+            Goal Progress
           </div>
-          <div className="text-xs text-slate-300 leading-relaxed">
-            Latest Panel: <span className="text-white font-semibold">{latestPanel}</span> ({latestPanelDate}). Status: <span className="text-emerald-400 font-medium">{labStatus}</span>.
-          </div>
-          <div className="text-[10px] text-purple-400 font-medium group-hover:underline flex items-center gap-1 pt-0.5">
-            View AI Diagnostic &amp; Lab Manager &rarr;
+          <div className="text-xs text-[var(--secondary)] leading-relaxed">
+            5km Pace & Core Mastery:{" "}
+            <span className="text-[var(--info)] font-semibold">68%</span>{" "}
+            complete (Week 4 of 8).
           </div>
         </div>
       </div>
     </div>
   );
 };
-

@@ -21,6 +21,7 @@ import {
   RefreshCw,
   Scale,
 } from "lucide-react";
+import { CollapsibleSection } from "./ui/CollapsibleSection";
 
 export interface LoggedFoodItem {
   id: string;
@@ -405,17 +406,17 @@ export const NutritionView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border)] pb-5">
         <div>
-          <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase flex items-center gap-1.5 font-mono">
-            <Utensils className="w-3.5 h-3.5" />
-            Nutritional Intelligence &amp; Calorie Analysis
+          <div className="section-label flex items-center gap-1.5">
+            <Utensils className="w-3.5 h-3.5 text-[var(--primary)]" />
+            Nutrition & Calorie Tracking
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white mt-1">
+          <h1 className="page-title mt-1">
             Nutrition, Energy &amp; Hydration
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time AI decomposition, custom exact calorie &amp; macro calculator, and hydration pacing.
+          <p className="text-sm text-[var(--muted)] mt-1">
+            Log meals, track macros, and manage hydration.
           </p>
         </div>
 
@@ -592,55 +593,66 @@ export const NutritionView: React.FC = () => {
 
           {/* Hydration & Nutrient Distribution */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="athena-card p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Droplets className="w-4 h-4 text-blue-400" />
-                  Hydration Pacing
-                </h3>
-                <span className="text-xs font-mono text-blue-400 font-bold">
-                  {waterMl} / {waterTarget} ml
-                </span>
-              </div>
+            <CollapsibleSection
+              title="Hydration & Dietitian Standards"
+              subtitle="Track daily water and view calculation guidelines"
+              icon={<Droplets className="w-4 h-4" />}
+              badge={`${waterMl}ml / ${waterTarget}ml`}
+              badgeColor="blue"
+              defaultOpen={false}
+            >
+              <div className="space-y-4 mt-4">
+                <div className="athena-card p-5 space-y-4 bg-slate-950 border-slate-800">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <h3 className="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Droplets className="w-4 h-4 text-blue-400" />
+                      Hydration Pacing
+                    </h3>
+                    <span className="text-xs font-mono text-blue-400 font-bold">
+                      {waterMl} / {waterTarget} ml
+                    </span>
+                  </div>
 
-              <div className="w-full bg-slate-950 rounded-full h-3 border border-slate-800 overflow-hidden">
-                <div
-                  className="bg-blue-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, (waterMl / waterTarget) * 100)}%` }}
-                ></div>
-              </div>
+                  <div className="w-full bg-slate-900 rounded-full h-3 border border-slate-800 overflow-hidden">
+                    <div
+                      className="bg-blue-500 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, (waterMl / waterTarget) * 100)}%` }}
+                    ></div>
+                  </div>
 
-              <div className="grid grid-cols-3 gap-2 pt-1">
-                <button
-                  onClick={() => handleAddWater(250)}
-                  className="py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 font-medium transition-colors text-center"
-                >
-                  +250 ml (Glass)
-                </button>
-                <button
-                  onClick={() => handleAddWater(500)}
-                  className="py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 font-medium transition-colors text-center"
-                >
-                  +500 ml (Bottle)
-                </button>
-                <button
-                  onClick={handleResetWater}
-                  className="py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400 hover:text-rose-400 transition-colors text-center"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
+                  <div className="grid grid-cols-3 gap-2 pt-1">
+                    <button
+                      onClick={() => handleAddWater(250)}
+                      className="py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 font-medium transition-colors text-center"
+                    >
+                      +250 ml (Glass)
+                    </button>
+                    <button
+                      onClick={() => handleAddWater(500)}
+                      className="py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 font-medium transition-colors text-center"
+                    >
+                      +500 ml (Bottle)
+                    </button>
+                    <button
+                      onClick={handleResetWater}
+                      className="py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-400 hover:text-rose-400 transition-colors text-center"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
 
-            <div className="athena-card p-4 space-y-2 border-slate-800 bg-slate-950 text-xs text-slate-400">
-              <div className="text-[11px] font-semibold text-white uppercase font-mono flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                Dietitian Scientific Standard
+                <div className="athena-card p-4 space-y-2 border-slate-800 bg-slate-950 text-xs text-slate-400">
+                  <div className="text-[11px] font-semibold text-white uppercase font-mono flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    Dietitian Scientific Standard
+                  </div>
+                  <p className="leading-relaxed">
+                    Calculations follow clinical physiological Atwater factors: <strong className="text-slate-300">4 kcal per 1g Protein, 4 kcal per 1g Carbohydrates, and 9 kcal per 1g Fat</strong>.
+                  </p>
+                </div>
               </div>
-              <p className="leading-relaxed">
-                Calculations follow clinical physiological Atwater factors: <strong className="text-slate-300">4 kcal per 1g Protein, 4 kcal per 1g Carbohydrates, and 9 kcal per 1g Fat</strong>.
-              </p>
-            </div>
+            </CollapsibleSection>
           </div>
         </div>
       )}

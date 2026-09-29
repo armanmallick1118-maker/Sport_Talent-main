@@ -34,15 +34,15 @@ export const SpecializedHubView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-5">
-        <div className="text-xs font-semibold tracking-wider text-blue-500 uppercase flex items-center gap-1.5">
+      <div className="border-b border-[var(--border)] pb-5">
+        <div className="section-label flex items-center gap-1.5">
           <Heart className="w-3.5 h-3.5" />
           Specialized Wellness Intelligence
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white mt-0.5">
+        <h1 className="page-title mt-0.5">
           Specialized Wellness Hub
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-sm text-[var(--muted)] mt-1">
           Dedicated modules for Women&apos;s Wellness, PCOS/PCOD Support, PRANA AGE+, Sedentary Inactivity, Healthy Peer Challenges, and the Wellness Knowledge Graph.
         </p>
       </div>

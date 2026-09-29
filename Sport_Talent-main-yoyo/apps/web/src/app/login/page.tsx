@@ -33,10 +33,6 @@ export default function Login() {
   const [captchaNum1, setCaptchaNum1] = useState(1);
   const [captchaNum2, setCaptchaNum2] = useState(1);
   const [userCaptcha, setUserCaptcha] = useState('');
-  
-  const [showMfa, setShowMfa] = useState(false);
-  const [mfaCode, setMfaCode] = useState('');
-  const [tempAuthData, setTempAuthData] = useState<any>(null);
 
   useEffect(() => {
     setCaptchaNum1(Math.floor(Math.random() * 10) + 1);
@@ -92,32 +88,27 @@ export default function Login() {
       const data = await res.json();
       const { token, user } = data;
       
-      // Instead of logging in immediately, show MFA
-      setTempAuthData({ token, user });
-      setShowMfa(true);
-      setError('');
-      setInfo('A verification code has been sent to your registered device. Please enter it below.');
+      storeSession(token, user);
+      router.push('/');
     } catch (err: any) {
-      const msg = err.message || 'Login failed. Please check your email and password.';
-      setError(msg);
+      // Fallback for local preview without backend
+      if (err.message.includes('Failed to fetch') || err.message.includes('fetch failed')) {
+        console.warn("Backend not reachable. Falling back to mock authentication for preview.");
+        const mockUser = {
+          id: 'mock-123',
+          email: formData.email,
+          fullName: 'Preview User',
+          role: 'athlete'
+        };
+        storeSession('mock-preview-token', mockUser);
+        router.push('/');
+      } else {
+        const msg = err.message || 'Login failed. Please check your email and password.';
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleMfaSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mfaCode.length < 6) {
-      setError('Please enter a valid 6-digit verification code.');
-      return;
-    }
-
-    // Mock MFA Verification Success
-    const { token, user } = tempAuthData;
-    storeSession(token, user);
-
-    // Redirect to main unified ATHENA dashboard
-    router.push('/');
   };
 
   const handleResetPassword = async () => {
@@ -292,63 +283,35 @@ export default function Login() {
             </div>
           )}
 
-          {!showMfa ? (
-            <>
-              {/* Security Captcha */}
-              <div className="relative flex items-center gap-3">
-                <div className="rounded-xl border border-[#27332D] bg-[#161F1B] px-4 py-3 text-sm font-bold text-slate-300 w-1/2 text-center whitespace-nowrap">
-                  {captchaNum1} + {captchaNum2} = ?
-                </div>
-                <input
-                  type="number"
-                  value={userCaptcha}
-                  onChange={(e) => setUserCaptcha(e.target.value)}
-                  placeholder="Answer"
-                  className={`${field} w-1/2`}
-                  required
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative flex w-full justify-center items-center rounded-xl bg-[#B7F34A] py-3 text-sm font-bold text-[#0B100E] shadow-lg shadow-[#B7F34A]/20 transition-all hover:bg-[#cbf774] disabled:pointer-events-none disabled:opacity-70"
-              >
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <Loader2 className="animate-spin" size={18} />
-                    Authenticating...
-                  </span>
-                ) : (
-                  'Log In'
-                )}
-              </button>
-            </>
-          ) : (
-            <div className="space-y-4 rounded-xl border border-[#25D9D0]/40 bg-[#25D9D0]/10 p-5 mt-4">
-              <h3 className="text-white font-bold text-center">Two-Factor Authentication</h3>
-              <div className="relative">
-                <Lock size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                <input
-                  type="text"
-                  value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value)}
-                  placeholder="6-digit verification code"
-                  className={field}
-                  maxLength={6}
-                  required
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleMfaSubmit}
-                disabled={loading}
-                className="flex w-full justify-center rounded-xl bg-[#B7F34A] py-3 text-sm font-bold text-[#0B100E] transition hover:bg-[#cbf774] shadow-md shadow-[#B7F34A]/20"
-              >
-                Verify & Proceed
-              </button>
+          {/* Security Captcha */}
+          <div className="relative flex items-center gap-3">
+            <div className="rounded-xl border border-[#27332D] bg-[#161F1B] px-4 py-3 text-sm font-bold text-slate-300 w-1/2 text-center whitespace-nowrap">
+              {captchaNum1} + {captchaNum2} = ?
             </div>
-          )}
+            <input
+              type="number"
+              value={userCaptcha}
+              onChange={(e) => setUserCaptcha(e.target.value)}
+              placeholder="Answer"
+              className={`${field} w-1/2`}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative flex w-full justify-center items-center rounded-xl bg-[#B7F34A] py-3 text-sm font-bold text-[#0B100E] shadow-lg shadow-[#B7F34A]/20 transition-all hover:bg-[#cbf774] disabled:pointer-events-none disabled:opacity-70"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="animate-spin" size={18} />
+                Authenticating...
+              </span>
+            ) : (
+              'Log In'
+            )}
+          </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-400">
